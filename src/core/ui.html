@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Safe Sweep</title>
 <style>
+  [hidden]{display:none !important}
   :root{
     --bg:#F3F1EC; --card:#FFFFFF; --ink:#1B1A17; --soft:#5F5B52; --faint:#8F8A7E; --rule:#E2DDD2;
     --accent:#1F5E4A; --accent-ink:#FFFFFF; --safe:#1F7A4D; --safe-bg:#E1F1E7;
@@ -138,12 +139,12 @@
       <div class="status">Scans and sends a notification. Never deletes.</div>
     </div>
     <div class="panel" id="launchPanel">
-      <h2>Open without Terminal</h2>
+      <h2>Open without a terminal</h2>
       <div class="lrow">
-        <div><div class="lt">Safe Sweep app</div><div class="ls" id="appStatus">…</div></div>
+        <div><div class="lt" id="appTitle">Safe Sweep app</div><div class="ls" id="appStatus">…</div></div>
         <button class="small" id="appBtn">Create app</button>
       </div>
-      <div class="lrow">
+      <div class="lrow" id="scRow">
         <div><div class="lt">Shortcuts</div><div class="ls" id="scStatus">…</div></div>
         <button class="small" id="scBtn">Add to Shortcuts</button>
       </div>
@@ -308,13 +309,16 @@ function renderSchedule() {
 }
 function renderLaunchers() {
   const a = settings.launchers.app;
-  $('appStatus').innerHTML = !a.installed ? 'Not created. Opens from Spotlight, Launchpad or the Dock.'
+  $('appTitle').textContent = a.text.title;
+  $('appStatus').innerHTML = !a.installed ? `Not created. ${esc(a.text.hint)}`
     : a.current ? `<span class="ok">Installed in ${esc(a.folder)}</span>`
-    : 'Installed, but points at an old Node or folder. Rebuild it.';
+    : 'Installed, but points at an old Node or folder. Update it.';
   if (a.legacy) $('appStatus').innerHTML += `<br><span class="warnline">Old “Mac Sweep” app at ${esc(a.legacy)} opens the old mac-sweep, not Safe Sweep. Delete it.</span>`;
-  $('appBtn').textContent = !a.installed ? 'Create app' : a.current ? 'Rebuild and show' : 'Rebuild app';
+  $('appBtn').textContent = !a.installed ? a.text.create : a.current ? a.text.again : a.text.stale;
 
   const sc = settings.launchers.shortcut;
+  $('scRow').hidden = !sc; // only macOS has Shortcuts
+  if (!sc) return;
   $('scStatus').innerHTML = !sc.available ? 'Shortcuts isn’t available on this Mac.'
     : sc.installed ? '<span class="ok">Added as “Safe Sweep”. Pin it to the menu bar from its details.</span>'
     : 'Shortcuts asks you to confirm. Needs Settings → Advanced → Allow Running Scripts.';
@@ -359,7 +363,7 @@ $('stopBtn').onclick = async () => {
   try { await api('/api/stop'); }
   catch (e) { b.disabled = false; return alert(e.message); }
   // The server is gone; leave a clear note instead of a page full of dead buttons.
-  document.querySelector('.wrap').innerHTML = `<h1>Safe Sweep</h1><div class="stopped"><b>Stopped.</b><span>Your last scan is saved. Open Safe Sweep again from the app, the shortcut, or <code>safe-sweep</code> in a terminal.</span></div>`;
+  document.querySelector('.wrap').innerHTML = `<h1>Safe Sweep</h1><div class="stopped"><b>Stopped.</b><span>Your last scan is saved. Open Safe Sweep again from its launcher, or run <code>safe-sweep</code> in a terminal.</span></div>`;
   document.querySelector('.foot').remove();
 };
 $('list').addEventListener('change', (e) => {

@@ -8,12 +8,12 @@
 //   blockedBy(...appKeys)  returns "Quit X first" or null
 //   notify(title, message), reveal(path), openUrl(url)
 //   schedule     { read, set, describe } or null if not supported yet
-//   launchers    { read, createApp, createShortcut } or null
+//   launchers    { read, createApp, createShortcut? } or null; read() returns { app, shortcut|null }
 //
 // SAFE_SWEEP_PLATFORM forces a platform module. It exists for development and tests;
 // forcing one OS's rules onto another is not safe on a real machine.
 
-const SUPPORTED = { darwin: './darwin/index.js' };
+const SUPPORTED = { darwin: './darwin/index.js', linux: './linux/index.js' };
 
 const id = process.env.SAFE_SWEEP_PLATFORM || process.platform;
 export const platform = SUPPORTED[id] ? (await import(SUPPORTED[id])).default : null;

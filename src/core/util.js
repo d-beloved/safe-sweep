@@ -7,14 +7,15 @@ export const HOME = os.homedir();
 export const STATE_DIR = path.join(HOME, '.safe-sweep');
 export const LEGACY_STATE_DIR = path.join(HOME, '.mac-sweep'); // the tool's name before it went public
 
-// launchd and Finder-launched processes get a bare PATH. Add the usual tool locations.
+// Scheduled jobs and app launchers get a bare PATH. Add the usual tool locations.
 const extraPath = [
   path.dirname(process.execPath), // node's own bin: npm, npx, and nvm-installed globals
   '/opt/homebrew/bin', '/usr/local/bin',
   path.join(HOME, '.bun/bin'), path.join(HOME, '.local/bin'), path.join(HOME, '.cargo/bin'),
   '/usr/bin', '/bin', '/usr/sbin', '/sbin',
 ];
-export const ENV = { ...process.env, PATH: [...new Set([...(process.env.PATH || '').split(path.delimiter), ...extraPath])].filter(Boolean).join(path.delimiter) };
+// COREPACK_ENABLE_NETWORK=0: asking pnpm or yarn for its cache folder must never download them.
+export const ENV = { ...process.env, COREPACK_ENABLE_NETWORK: '0', PATH: [...new Set([...(process.env.PATH || '').split(path.delimiter), ...extraPath])].filter(Boolean).join(path.delimiter) };
 
 /** Run a command. Never throws: returns { ok, code, stdout, stderr }. */
 export function run(cmd, args = [], { timeout = 120_000 } = {}) {

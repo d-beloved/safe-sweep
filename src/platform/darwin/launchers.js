@@ -39,7 +39,9 @@ export async function readLaunchers() {
   const legacyApp = await findApp(LEGACY_APP_PATHS);
   return {
     app: { installed: !!appPath, current: appCurrent, path: appPath, folder: appPath ? path.dirname(appPath).replace(HOME, '~') : null,
-      legacy: legacyApp ? legacyApp.replace(HOME, '~') : null },
+      legacy: legacyApp ? legacyApp.replace(HOME, '~') : null,
+      text: { title: 'Safe Sweep app', hint: 'Opens from Spotlight, Launchpad or the Dock.',
+        create: 'Create app', again: 'Rebuild and show', stale: 'Rebuild app' } },
     shortcut: { installed: shortcut, available: await has('shortcuts'), legacy: legacyShortcut },
   };
 }
@@ -68,6 +70,7 @@ export async function createApp() {
   if (!built) throw new Error(`Couldn’t build the app: ${lastErr}`);
   // Nudge Spotlight to index it now rather than whenever it gets round to it.
   await run('mdimport', [built], { timeout: 20_000 });
+  await run('open', ['-R', built]); // show it in Finder, ready to drag to the Dock
   return readLaunchers();
 }
 

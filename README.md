@@ -7,7 +7,7 @@ safe-sweep scans for caches, build leftovers and dormant `node_modules`, sorts t
 ![safe-sweep after a scan](docs/screenshot.png)
 <sub>Screenshot uses sample sizes.</sub>
 
-**Platforms:** macOS today. Linux is next, then Windows. See [Platform support](#platform-support).
+**Platforms:** macOS and Linux. See [Platform support](#platform-support).
 
 ## Install
 
@@ -20,7 +20,7 @@ npm link        # puts `safe-sweep` on your PATH
 safe-sweep      # opens the Scan page in your browser
 ```
 
-The first run creates `~/.safe-sweep/config.json`. macOS may ask Terminal for access to Desktop or Documents. Allow it, or projects there won't be found.
+The first run creates `~/.safe-sweep/config.json`. On macOS, Terminal may ask for access to Desktop or Documents. Allow it, or projects there won't be found.
 
 ## How it works
 
@@ -32,23 +32,23 @@ The scan is saved, so refreshing the page keeps it. Cleaning needs a scan from t
 
 ### The three lists
 
-**Safe to clear.** Caches and leftovers that rebuild themselves. Docker build cache and dangling images, npm / yarn / pnpm / bun / uv caches, `brew cleanup`, app caches (Chrome, Spotify, Codex, Playwright), app-updater leftovers, `~/.cache` dev caches, app logs.
+**Safe to clear.** Caches and leftovers that rebuild themselves. Docker build cache and dangling images, npm / yarn / pnpm / bun / uv caches, `brew cleanup`, app caches (Chrome, Firefox on Linux, Spotify, Codex, Playwright), named dev caches in `~/.cache` (pip, Prisma, Puppeteer and others), image thumbnails on Linux, and on macOS app-updater leftovers and app logs.
 
 **Safe, costs a reinstall.** Comes back with a download or an install command. Hugging Face models, Chrome's on-device AI model, `_to_delete` folders, and `node_modules` in dormant projects. A `node_modules` folder is only offered when:
 - the project has had no commit or file change for `dormantDays` (default 60),
 - its lockfile is committed to git, so a reinstall gives the same versions,
 - its path doesn't match anything in your `protect` list.
 
-**Your call.** Shown so you know where space went, with a button to open the folder. safe-sweep never deletes these: WhatsApp media, Docker's virtual disk, Movies, Downloads, Trash, old Node and Ruby versions, loose installers.
+**Your call.** Shown so you know where space went, with a button to open the folder. safe-sweep never deletes these: Downloads, Trash, Movies or Videos, old Node and Ruby versions, loose installers. On macOS also WhatsApp media and Docker's virtual disk. On Linux also apt, dnf, pacman and Snap package caches, Flatpak runtimes and the system journal, each with the command that clears it. Those need `sudo`, and safe-sweep never asks for it.
 
 ## Safety
 
 This tool deletes files, so it is built to refuse first.
 
 - **Allowlist.** It deletes only inside a fixed list of path patterns per OS (`src/core/rules.js` plus `src/platform/<os>/rules.js`). Anything else is refused, even if a rule asks for it.
-- **Denylist.** WhatsApp's container, iCloud, CloudStorage (Google Drive, Dropbox) and every `.git` folder are blocked even if an allowlist pattern matches.
+- **Denylist.** Every `.git` folder, chat data (WhatsApp), and cloud-synced folders (iCloud, Google Drive, Dropbox, OneDrive, Nextcloud) are blocked even if an allowlist pattern matches. On Linux, so are the Trash, `~/.ssh` and `~/.gnupg`.
 - **Symlinks.** Paths are checked as written and with symlinks resolved. A target that is itself a symlink is refused.
-- **Open apps.** It re-checks that Chrome, Spotify, Cursor or Codex are closed right before clearing their caches.
+- **Open apps.** It re-checks that the app is closed (Chrome, Firefox, Spotify, Cursor, Codex) right before clearing its cache.
 - **Docker.** It never runs `docker image prune -a` or `docker volume prune`. With zero containers, Docker counts every image and volume as unused, including the ones you need.
 - **Local only.** The page is served on `127.0.0.1`, checks the Host header, and needs a per-session token on every action, so other websites can't trigger a clean.
 - **Logged.** Every clean is written to `~/.safe-sweep/log.jsonl`. Run `safe-sweep log` to read it.
@@ -70,11 +70,13 @@ The delete guard has its own tests (`npm test`). Read `src/core/guard.js` before
 
 Scheduled runs only scan and notify. They never delete.
 
-## Opening it without a terminal (macOS)
+## Opening it without a terminal
 
-From the page:
+On macOS, from the page:
 - **Create app** builds `Safe Sweep.app` in `/Applications` (or `~/Applications` if that isn't writable). It opens from Spotlight, Launchpad or the Dock.
 - **Add to Shortcuts** builds a shortcut and opens Shortcuts' own Add dialog. It needs Shortcuts → Settings → Advanced → **Allow Running Scripts**. That setting applies to every shortcut, so only add shortcuts you trust. The app needs no such setting.
+
+On Linux, **Add to menu** writes `~/.local/share/applications/safe-sweep.desktop`. Safe Sweep then opens from your app launcher.
 
 ## Config
 
@@ -95,24 +97,22 @@ From the page:
 
 ## Platform support
 
-| | macOS | Linux | Windows |
-|---|---|---|---|
-| Scan and clean | ✅ | planned next | planned |
-| Scheduled check | ✅ launchd | planned (systemd timer) | planned (Task Scheduler) |
-| App / shortcut | ✅ | planned (.desktop) | planned |
+| | macOS | Linux |
+|---|---|---|
+| Scan and clean | ✅ | ✅ |
+| Scheduled check | ✅ launchd | ✅ systemd user timer |
+| Notifications | ✅ | ✅ `notify-send`, if installed |
+| Open without a terminal | ✅ app and Shortcuts | ✅ menu entry (`.desktop`) |
 
-On an unsupported OS, safe-sweep exits with a message and touches nothing. Each OS is one folder under `src/platform/`. See [CONTRIBUTING.md](CONTRIBUTING.md) if you'd like to help with Linux or Windows.
+On any other OS, safe-sweep exits with a message and touches nothing. Each OS is one folder under `src/platform/`. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Known gaps
 
 - Docker Desktop frees pruned space inside its disk file. Your real disk may not get it back until Docker Desktop restarts.
-- Sizes for Trash, Downloads and Desktop need Terminal to have Full Disk Access. Without it they show `?`.
-- The schedule, app and shortcut pin the Node binary you created them with. If you remove that Node version, the page flags the schedule and the app. Save and rebuild them.
+- On macOS, sizes for Trash, Downloads and Desktop need Terminal to have Full Disk Access. Without it they show `?`.
+- The schedule and launchers pin the Node binary you created them with. If you remove that Node version, the page flags them. Save and rebuild them.
+- On Linux, the scheduled check needs systemd. Without it, scheduling shows an error and the rest works.
 - The shortcut file is hand-built. If `shortcuts sign` rejects it on your macOS version, the page shows the error. Use the app instead.
-
-## Upgrading from mac-sweep
-
-safe-sweep was called mac-sweep before it was public. On first run it copies your settings and history from `~/.mac-sweep` and leaves that folder alone. The page flags the old schedule, app and shortcut. Press **Save** on the schedule to move it over, create the new app, then delete the old "Mac Sweep" app and shortcut.
 
 ## License
 

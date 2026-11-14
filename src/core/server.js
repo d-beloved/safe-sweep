@@ -117,9 +117,8 @@ export async function startServer(cfg, { onListening } = {}) {
           if (body.kind === 'app') {
             if (!platform.launchers) return send(res, 400, { error: 'Not supported on this OS yet' });
             await platform.launchers.createApp();
-            await platform.reveal((await platform.launchers.read()).app.path);
           } else if (body.kind === 'shortcut') {
-            if (!platform.launchers) return send(res, 400, { error: 'Not supported on this OS yet' });
+            if (!platform.launchers?.createShortcut) return send(res, 400, { error: 'Not supported on this OS yet' });
             await platform.launchers.createShortcut();
           } else return send(res, 400, { error: 'Unknown launcher' });
           return send(res, 200, await settings());

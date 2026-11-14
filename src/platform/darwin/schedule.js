@@ -2,16 +2,15 @@
 // The page and the CLI both read it back, so what you see is what's installed.
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { HOME, STATE_DIR, run, exists } from '../../core/util.js';
+import { BIN, MINUTE, checkInput, describe } from '../../core/schedule.js';
 
 export const LABEL = 'io.github.d-beloved.safe-sweep';
 export const PLIST = path.join(HOME, 'Library/LaunchAgents', `${LABEL}.plist`);
 // The job the tool installed before it was renamed. Read so it shows up; replaced on the next Save.
 const LEGACY_LABEL = 'dev.morayodeji.mac-sweep';
 const LEGACY_PLIST = path.join(HOME, 'Library/LaunchAgents', `${LEGACY_LABEL}.plist`);
-export const BIN = fileURLToPath(new URL('../../../bin/safe-sweep.js', import.meta.url));
-export const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+export { BIN, describe };
 
 const domain = () => `gui/${process.getuid()}`;
 
@@ -38,12 +37,8 @@ export async function readSchedule() {
   };
 }
 
-export async function setSchedule({ mode, day = 1, hour = 10 }) {
-  // Check the input before touching anything installed.
-  if (!['off', 'daily', 'weekly'].includes(mode)) throw new Error('Mode must be off, daily or weekly');
-  hour = Math.trunc(Number(hour)); day = Math.trunc(Number(day));
-  if (mode !== 'off' && !(hour >= 0 && hour <= 23)) throw new Error('Hour must be 0–23');
-  if (mode === 'weekly' && !(day >= 0 && day <= 6)) throw new Error('Day must be 0 (Sunday) to 6 (Saturday)');
+export async function setSchedule(input) {
+  const { mode, day, hour } = checkInput(input);
 
   await run('launchctl', ['bootout', domain(), PLIST]); // fine if nothing was loaded
   // Retire the pre-rename job so two schedules never run side by side.
@@ -55,7 +50,7 @@ export async function setSchedule({ mode, day = 1, hour = 10 }) {
     await fs.rm(PLIST, { force: true });
     return readSchedule();
   }
-  const interval = { Hour: hour, Minute: 7 };
+  const interval = { Hour: hour, Minute: MINUTE };
   if (mode === 'weekly') interval.Weekday = day;
   const dict = Object.entries(interval).map(([k, v]) => `<key>${k}</key><integer>${v}</integer>`).join('');
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -73,10 +68,4 @@ export async function setSchedule({ mode, day = 1, hour = 10 }) {
   const r = await run('launchctl', ['bootstrap', domain(), PLIST]);
   if (!r.ok) throw new Error(`launchctl couldn't load the schedule: ${r.stderr.trim() || r.code}`);
   return readSchedule();
-}
-
-export function describe(s) {
-  if (s.mode === 'off') return 'Off';
-  const t = `${String(s.hour).padStart(2, '0')}:07`;
-  return s.mode === 'daily' ? `Every day at ${t}` : `Every ${DAYS[s.day]} at ${t}`;
 }

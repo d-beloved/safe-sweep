@@ -22,6 +22,7 @@ src/core/                    shared by every OS
 src/platform/
   index.js                   picks the module for this OS
   darwin/                    macOS: rules, allowlist, launchd schedule, app and shortcut
+  linux/                     Linux: rules, allowlist, systemd timer, menu entry
 test/
 ```
 
@@ -41,17 +42,10 @@ A rule is an async function that returns items. See the top of `src/core/rules.j
 
 Create `src/platform/<process.platform>/index.js` exporting the shape described at the top of `src/platform/index.js`, then register it in `SUPPORTED`. `schedule` and `launchers` can be `null` at first: the page hides those panels.
 
-What we know is needed:
+Notes on the existing platforms:
 
-**Linux**
-- Rules: per-app folders in `~/.cache` (each one named, never the whole folder), `~/.local/share/Trash` as report-only, journald and apt/dnf caches as report-only (they need sudo; this tool never asks for it), Flatpak unused runtimes via `flatpak uninstall --unused` (report first).
-- Schedule: a systemd user timer. Notify: `notify-send`. Reveal: `xdg-open` on the parent folder.
-
-**Windows**
-- `du` and `pgrep` don't exist. Sizes need a Node directory walk; running apps need `tasklist`.
-- Paths: `%LOCALAPPDATA%\Temp`, `%LOCALAPPDATA%\npm-cache`, browser caches under `%LOCALAPPDATA%`. The guard compares with forward slashes, so patterns stay portable.
-- Schedule: Task Scheduler (`schtasks`). Notify: a PowerShell toast.
-- Please only open a Windows pull request if you've run it on a real Windows machine.
+- **Linux** allows named folders in `~/.cache` only, never the whole folder: some apps keep state there. Anything that needs `sudo` (apt, dnf, pacman, Snap, the journal) is report-only, with the command to run. `test/linux.test.js` runs on any OS with a stand-in `systemctl`.
+- **macOS** scheduled checks run under launchd without Terminal's privacy permissions. Rules that read other apps' folders are marked `reportOnly` so the check skips them.
 
 `SAFE_SWEEP_PLATFORM=<id>` forces a platform module. It's for development and tests only. Running one OS's rules on another is not safe on a real machine.
 

@@ -26,7 +26,7 @@ Scheduled runs only scan and notify. They never delete.`;
 
 async function main() {
   if (!platform) {
-    console.error(`safe-sweep doesn't support ${process.platform} yet. Supported: ${SUPPORTED_IDS.join(', ')}.\nLinux is next, then Windows: https://github.com/d-beloved/safe-sweep`);
+    console.error(`safe-sweep doesn't support ${process.platform} yet. Supported: ${SUPPORTED_IDS.join(', ')}.`);
     process.exit(2);
   }
   const cfg = await loadConfig();
