@@ -30,7 +30,7 @@ This tool deletes files on people's machines. Treat anything that deletes as hig
 1. **First run on a real Mac: done 2026-11-14** (macOS 26, Node 24). Settings copied from `~/.mac-sweep`, real scan, real clean (app logs), real launchd schedule and scheduled check, app built in `/Applications`, shortcut signed. The old-schedule replace was tested with a stand-in `launchctl`, since no old job was installed. Two fixes came out of it: Save now works on a flagged schedule, and `check` skips report-only rules (macOS held background reads of WhatsApp's folder).
 2. **GitHub.** `d-beloved/safe-sweep`, made public on 2026-11-14 after a check for personal details.
 3. **Linux platform: built 2026-11-14** (`src/platform/linux`): named `~/.cache` folders, Chrome AI model, report-only package caches and journal, systemd user timer, `.desktop` menu entry. Tested with `SAFE_SWEEP_PLATFORM=linux` in a temp home on macOS and in CI on Ubuntu. Still to do: a first run on a real Linux desktop (schedule via real systemd, notify-send, menu entry showing in the launcher).
-4. **npm.** Package `safe-sweep` prepared 2026-11-14 (`private` removed, `os` set to darwin and linux). Publish with `npm publish` from this folder; bump with `npm version patch|minor` first for later releases.
+4. **npm.** Published as `@d-beloved/safe-sweep` (the plain name was refused as too close to `safesweep`). The command is still `safe-sweep`. `publishConfig.access` is public, so plain `npm publish` works. Publish with `npm publish` from this folder; bump with `npm version patch|minor` first for later releases.
 5. No Windows support is planned for now.
 
 ## Known quirks

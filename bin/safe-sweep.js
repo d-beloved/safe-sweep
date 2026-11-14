@@ -32,7 +32,7 @@ async function main() {
   }
   const cfg = await loadConfig();
   if (cfg.migrated) console.log('Copied your settings and history from ~/.mac-sweep to ~/.safe-sweep.');
-  if (TEMPORARY && cmd === 'ui') console.log('Running through npx. Scan and clean work. To set a schedule or launcher, install it: npm i -g safe-sweep');
+  if (TEMPORARY && cmd === 'ui') console.log('Running through npx. Scan and clean work. To set a schedule or launcher, install it: npm i -g @d-beloved/safe-sweep');
 
   if (cmd === 'ui') {
     const url = `http://127.0.0.1:${cfg.port}/`;

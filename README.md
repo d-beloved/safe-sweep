@@ -14,11 +14,11 @@ safe-sweep scans for caches, build leftovers and dormant `node_modules`, sorts t
 Needs Node 20 or newer. No dependencies.
 
 ```bash
-npm install -g safe-sweep
+npm install -g @d-beloved/safe-sweep
 safe-sweep      # opens the Scan page in your browser
 ```
 
-To try it once without installing, run `npx safe-sweep`. Scan and clean work the same. A schedule or launcher needs the installed version, because npx runs from a temporary folder.
+To try it once without installing, run `npx @d-beloved/safe-sweep`. Scan and clean work the same. A schedule or launcher needs the installed version, because npx runs from a temporary folder.
 
 To work on the code, clone the repo and run `npm link` in it instead.
 

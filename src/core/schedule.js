@@ -8,7 +8,7 @@ export const MINUTE = 7; // off the hour, so it doesn't land with every other jo
 // Run through npx, safe-sweep lives in npm's temporary cache (~/.npm/_npx). A schedule or
 // launcher pointing there breaks when that cache is cleared, and safe-sweep offers to clear it.
 export const TEMPORARY = /[\\/]_npx[\\/]/.test(BIN);
-export const TEMPORARY_MSG = 'safe-sweep is running through npx, from a temporary folder. Install it with npm i -g safe-sweep to set a schedule or launcher.';
+export const TEMPORARY_MSG = 'safe-sweep is running through npx, from a temporary folder. Install it with npm i -g @d-beloved/safe-sweep to set a schedule or launcher.';
 export function needsInstall() {
   if (TEMPORARY) throw new Error(TEMPORARY_MSG);
 }

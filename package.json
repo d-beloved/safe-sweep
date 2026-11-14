@@ -1,5 +1,5 @@
 {
-  "name": "safe-sweep",
+  "name": "@d-beloved/safe-sweep",
   "version": "0.1.0",
   "description": "Find disk space you can free on your machine, and delete only what you tick. Local web page, allowlisted deletes, no network, no telemetry.",
   "type": "module",
@@ -43,5 +43,8 @@
   "os": [
     "darwin",
     "linux"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }
