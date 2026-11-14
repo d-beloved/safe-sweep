@@ -304,21 +304,21 @@ function renderSchedule() {
   if (s.day != null) $('schedDay').value = s.day;
   if (s.hour != null) $('schedHour').value = s.hour;
   syncSchedControls();
-  $('schedSave').disabled = true;
+  $('schedSave').disabled = !s.warning; // a flagged schedule needs Save to fix it, with no change made
 }
 function renderLaunchers() {
   const a = settings.launchers.app;
   $('appStatus').innerHTML = !a.installed ? 'Not created. Opens from Spotlight, Launchpad or the Dock.'
     : a.current ? `<span class="ok">Installed in ${esc(a.folder)}</span>`
     : 'Installed, but points at an old Node or folder. Rebuild it.';
-  if (a.legacy) $('appStatus').innerHTML += `<br><span class="warnline">Old “Mac Sweep” app at ${esc(a.legacy)} no longer works after the rename. Delete it.</span>`;
+  if (a.legacy) $('appStatus').innerHTML += `<br><span class="warnline">Old “Mac Sweep” app at ${esc(a.legacy)} opens the old mac-sweep, not Safe Sweep. Delete it.</span>`;
   $('appBtn').textContent = !a.installed ? 'Create app' : a.current ? 'Rebuild and show' : 'Rebuild app';
 
   const sc = settings.launchers.shortcut;
   $('scStatus').innerHTML = !sc.available ? 'Shortcuts isn’t available on this Mac.'
     : sc.installed ? '<span class="ok">Added as “Safe Sweep”. Pin it to the menu bar from its details.</span>'
     : 'Shortcuts asks you to confirm. Needs Settings → Advanced → Allow Running Scripts.';
-  if (sc.legacy) $('scStatus').innerHTML += '<br><span class="warnline">Old “Mac Sweep” shortcut no longer works after the rename. Delete it in Shortcuts.</span>';
+  if (sc.legacy) $('scStatus').innerHTML += '<br><span class="warnline">Old “Mac Sweep” shortcut opens the old mac-sweep, not Safe Sweep. Delete it in Shortcuts.</span>';
   $('scBtn').disabled = !sc.available;
   $('scBtn').textContent = sc.installed ? 'Add again' : 'Add to Shortcuts';
 }
@@ -330,7 +330,7 @@ function syncSchedControls() {
 function markDirty() {
   const s = settings.schedule;
   const same = draftMode === s.mode && (draftMode === 'off' || (Number($('schedHour').value) === s.hour && (draftMode !== 'weekly' || Number($('schedDay').value) === s.day)));
-  $('schedSave').disabled = same;
+  $('schedSave').disabled = same && !s.warning;
 }
 document.querySelectorAll('.seg button').forEach((b) => b.onclick = () => { draftMode = b.dataset.mode; syncSchedControls(); markDirty(); });
 $('schedDay').onchange = markDirty;
