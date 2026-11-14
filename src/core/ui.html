@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Safe Sweep</title>
+<style>
+  :root{
+    --bg:#F3F1EC; --card:#FFFFFF; --ink:#1B1A17; --soft:#5F5B52; --faint:#8F8A7E; --rule:#E2DDD2;
+    --accent:#1F5E4A; --accent-ink:#FFFFFF; --safe:#1F7A4D; --safe-bg:#E1F1E7;
+    --warn:#8A5A00; --warn-bg:#F6EBD3; --info:#4A5A78; --info-bg:#E6EAF2; --bad:#A3362E; --bad-bg:#F6E1DE;
+    --bar:#E7E2D7; --used:#2B2A26;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#121311; --card:#1B1C1A; --ink:#ECEAE4; --soft:#B3AFA5; --faint:#7E7A70; --rule:#2C2D2A;
+      --accent:#5CC29B; --accent-ink:#0F1A15; --safe:#6FCF9B; --safe-bg:#1A2E23;
+      --warn:#E3B45C; --warn-bg:#33291A; --info:#9DB0D6; --info-bg:#1F2533; --bad:#E8857C; --bad-bg:#352120;
+      --bar:#2A2B28; --used:#D9D6CE;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:880px;margin:0 auto;padding:32px 16px 140px}
+  header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  h1{font:700 28px/1.1 -apple-system,"SF Pro Display",system-ui,sans-serif;letter-spacing:-.02em;margin:0}
+  .sub{color:var(--soft);font-size:13px;margin-top:4px}
+  button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--rule);background:var(--card);color:var(--ink);padding:8px 14px;font-weight:600}
+  button:hover:not(:disabled){border-color:var(--faint)}
+  button:disabled{opacity:.5;cursor:default}
+  button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);padding:10px 20px}
+  button.danger{background:var(--bad);color:#fff;border-color:var(--bad)}
+  button.link{border:none;background:none;color:var(--soft);padding:2px 6px;font-weight:500;font-size:13px;text-decoration:underline}
+  button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  .disk{margin-top:24px;background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:16px 18px}
+  .disk .row{display:flex;justify-content:space-between;font-size:13px;color:var(--soft);margin-bottom:8px;gap:8px;flex-wrap:wrap}
+  .disk .row b{color:var(--ink);font-variant-numeric:tabular-nums}
+  .bar{height:12px;border-radius:6px;background:var(--bar);overflow:hidden;display:flex}
+  .bar .used{background:var(--used)}
+  .bar .gain{background:repeating-linear-gradient(135deg,var(--accent),var(--accent) 3px,transparent 3px,transparent 6px)}
+  .totals{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .tot{flex:1;min-width:150px;border-radius:10px;padding:10px 12px}
+  .tot .n{font-weight:700;font-size:20px;font-variant-numeric:tabular-nums}
+  .tot .l{font-size:12px}
+  .tot.safe{background:var(--safe-bg);color:var(--safe)} .tot.reinstall{background:var(--warn-bg);color:var(--warn)} .tot.review{background:var(--info-bg);color:var(--info)}
+
+  section{margin-top:32px}
+  .shead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:8px;flex-wrap:wrap}
+  .shead h2{margin:0;font-size:18px}
+  .shead p{margin:4px 0 0;color:var(--soft);font-size:13px;width:100%}
+  .row-item{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:12px;align-items:start;padding:12px 4px;border-bottom:1px solid var(--rule)}
+  .row-item > *{min-width:0}
+  .row-item.off{opacity:.62}
+  .row-item input{width:18px;height:18px;margin-top:3px;accent-color:var(--accent)}
+  .t{font-weight:600}
+  .d{color:var(--soft);font-size:13px}
+  .c{color:var(--faint);font-size:12.5px}
+  .path{font:12px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--faint);word-break:break-all}
+  .right{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+  .size{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .pill{font-size:11px;font-weight:700;border-radius:4px;padding:2px 7px;white-space:nowrap;background:var(--bad-bg);color:var(--bad)}
+  .empty{color:var(--faint);padding:12px 4px;font-size:14px}
+  .err{margin-top:16px;background:var(--bad-bg);color:var(--bad);border-radius:10px;padding:10px 14px;font-size:13px}
+  .hint{margin-top:40px;color:var(--soft);font-size:13px}
+  .hint code{font:12px ui-monospace,Menlo,monospace;background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:1px 5px}
+
+  .foot{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--rule);padding:12px 16px;box-shadow:0 -6px 20px rgba(0,0,0,.06)}
+  .foot .in{max-width:880px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .foot .sel{font-size:14px;color:var(--soft)} .foot .sel b{color:var(--ink);font-size:18px;font-variant-numeric:tabular-nums}
+
+  dialog{border:1px solid var(--rule);border-radius:14px;background:var(--card);color:var(--ink);max-width:560px;width:calc(100% - 32px);padding:22px}
+  dialog::backdrop{background:rgba(0,0,0,.4)}
+  dialog h3{margin:0 0 6px;padding-right:36px}
+  dialog{position:relative}
+  .x{position:absolute;top:12px;right:12px;width:32px;height:32px;padding:0;border-radius:8px;font-size:18px;line-height:1;font-weight:400;color:var(--soft)}
+  .sum{display:grid;grid-template-columns:auto auto;justify-content:start;gap:2px 16px;font-size:14px;margin:10px 0 4px}
+  .sum span:nth-child(odd){color:var(--soft)} .sum b{font-variant-numeric:tabular-nums}
+  .note{font-size:13px;color:var(--warn);background:var(--warn-bg);border-radius:8px;padding:8px 10px;margin-top:8px}
+  dialog ul{max-height:45vh;overflow:auto;padding-left:18px;font-size:14px}
+  dialog .act{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+  .res-ok{color:var(--safe)} .res-bad{color:var(--bad)}
+  .spin{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:s .8s linear infinite;vertical-align:-2px;margin-right:6px}
+  @keyframes s{to{transform:rotate(1turn)}}
+  @media (prefers-reduced-motion:reduce){.spin{animation:none}}
+  .hbtns{display:flex;gap:8px}
+  .stopped{margin-top:24px;background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:24px;text-align:center}
+  .stopped b{display:block;font-size:18px;margin-bottom:4px}
+  .stopped span{color:var(--soft);font-size:14px}
+  .warnline{color:var(--warn)}
+  .panels{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
+  .panel{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+  .panel h2{margin:0;font-size:14px;letter-spacing:.02em}
+  .panel .status{font-size:13px;color:var(--soft)} .panel .status b{color:var(--ink)}
+  .panel .warn{font-size:12.5px;color:var(--warn)}
+  .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  select{font:inherit;font-size:14px;border:1px solid var(--rule);border-radius:8px;background:var(--surface,var(--card));color:var(--ink);padding:6px 8px}
+  .seg{display:inline-flex;border:1px solid var(--rule);border-radius:8px;overflow:hidden}
+  .seg button{border:none;border-radius:0;padding:6px 12px;font-weight:500;background:transparent}
+  .seg button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink)}
+  .lrow{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+  .lrow .lt{font-size:14px;font-weight:600} .lrow .ls{font-size:12.5px;color:var(--soft)}
+  .ok{color:var(--safe)}
+  .stale{margin-top:16px;background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:10px 14px;font-size:13px}
+  button.small{padding:6px 12px;font-size:13px}
+  @media (max-width:700px){.panels{grid-template-columns:1fr}}
+  @media (max-width:560px){.row-item{grid-template-columns:24px minmax(0,1fr)}.right{grid-column:2;align-items:center;flex-direction:row;flex-wrap:wrap}.pill{white-space:normal}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Safe Sweep</h1>
+      <div class="sub" id="when">Not scanned yet.</div>
+    </div>
+    <div class="hbtns">
+      <button id="stopBtn" title="Shut down the Safe Sweep server">Stop</button>
+      <button class="primary" id="scanBtn">Scan</button>
+    </div>
+  </header>
+
+  <div class="panels" id="panels">
+    <div class="panel" id="schedPanel">
+      <h2>Scheduled check</h2>
+      <div class="status">Now: <b id="schedNow">…</b></div>
+      <div class="warn" id="schedWarn" hidden></div>
+      <div class="controls">
+        <div class="seg" role="group" aria-label="Schedule">
+          <button type="button" data-mode="off">Off</button>
+          <button type="button" data-mode="daily">Daily</button>
+          <button type="button" data-mode="weekly">Weekly</button>
+        </div>
+        <select id="schedDay" aria-label="Day"></select>
+        <select id="schedHour" aria-label="Hour"></select>
+        <button class="small" id="schedSave" disabled>Save</button>
+      </div>
+      <div class="status">Scans and sends a notification. Never deletes.</div>
+    </div>
+    <div class="panel" id="launchPanel">
+      <h2>Open without Terminal</h2>
+      <div class="lrow">
+        <div><div class="lt">Safe Sweep app</div><div class="ls" id="appStatus">…</div></div>
+        <button class="small" id="appBtn">Create app</button>
+      </div>
+      <div class="lrow">
+        <div><div class="lt">Shortcuts</div><div class="ls" id="scStatus">…</div></div>
+        <button class="small" id="scBtn">Add to Shortcuts</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="disk" id="disk" hidden>
+    <div class="row"><span>Disk</span><span><b id="free">–</b> free of <b id="total">–</b></span></div>
+    <div class="bar"><div class="used" id="usedBar"></div><div class="gain" id="gainBar"></div></div>
+    <div class="totals">
+      <div class="tot safe"><div class="n" id="tSafe">–</div><div class="l">Safe to clear now</div></div>
+      <div class="tot reinstall"><div class="n" id="tRe">–</div><div class="l">Safe, costs a reinstall</div></div>
+      <div class="tot review"><div class="n" id="tRev">–</div><div class="l">Your call (never auto-deleted)</div></div>
+    </div>
+  </div>
+
+  <div id="errors"></div>
+  <div id="list"></div>
+
+  <p class="hint">Nothing is deleted until you tick it and confirm. Every action is logged to <code>~/.safe-sweep/log.jsonl</code>. Edit what counts as a project or what's protected in <code>~/.safe-sweep/config.json</code>.</p>
+</div>
+
+<div class="foot">
+  <div class="in">
+    <div class="sel"><b id="selGB">0 GB</b> selected · <span id="selN">0</span> items</div>
+    <div>
+      <button id="allSafe" disabled>Select all safe</button>
+      <button class="primary" id="cleanBtn" disabled>Clean selected</button>
+    </div>
+  </div>
+</div>
+
+<dialog id="confirm">
+  <button class="x" type="button" data-close aria-label="Close">×</button>
+  <h3>Delete these?</h3>
+  <div class="c">This can't be undone from here. Caches and node_modules come back with a reinstall.</div>
+  <ul id="confirmList"></ul>
+  <div class="act"><button id="cancel">Cancel</button><button class="danger" id="go">Delete</button></div>
+</dialog>
+
+<dialog id="done">
+  <button class="x" type="button" data-close aria-label="Close">×</button>
+  <h3 id="doneTitle">Done</h3>
+  <div class="sum" id="doneSum"></div>
+  <div id="doneNote"></div>
+  <ul id="doneList"></ul>
+  <div class="act"><button type="button" data-close>Close</button><button class="primary" id="doneOk">Scan again</button></div>
+</dialog>
+
+<script>
+const TOKEN = '__TOKEN__';
+const $ = (id) => document.getElementById(id);
+const fmt = (b) => b == null ? '?' : b < 1e6 ? Math.round(b/1e3)+' KB' : b < 1e9 ? Math.round(b/1e6)+' MB' : (b/1e9).toFixed(1)+' GB';
+const tildePath = (p) => (settings?.home && p.startsWith(settings.home + '/')) ? '~' + p.slice(settings.home.length) : p;
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let data = null;
+let settings = null;
+const MAX_CLEAN_AGE = 60 * 60_000;
+const store = {
+  get() { try { return JSON.parse(localStorage.getItem('sweep.selected') || '[]'); } catch { return []; } },
+  set(ids) { try { localStorage.setItem('sweep.selected', JSON.stringify(ids)); } catch {} },
+};
+const selected = new Set(store.get());
+const isStale = () => !data || Date.now() - Date.parse(data.at) > MAX_CLEAN_AGE;
+const ago = (iso) => { const m = Math.round((Date.now() - Date.parse(iso)) / 60000); return m < 1 ? 'just now' : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m/60)} h ago` : `${Math.round(m/1440)} d ago`; };
+
+async function api(path, body = {}) {
+  let r;
+  try {
+    r = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Sweep-Token': TOKEN }, body: JSON.stringify(body) });
+  } catch { throw new Error('The scanner stopped. Run safe-sweep again in your terminal.'); }
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || r.statusText);
+  return j;
+}
+
+const TIERS = [
+  ['safe', 'Safe to clear', 'Caches and leftovers. Nothing of yours is lost.'],
+  ['reinstall', 'Safe, costs a reinstall', 'Comes back with a download or an install command.'],
+  ['review', 'Your call', 'Listed so you know where space went. This tool never deletes these.'],
+];
+
+function render() {
+  if (!data) return;
+  $('when').textContent = `Scanned ${ago(data.at)} (${new Date(data.at).toLocaleString()}) · took ${(data.ms/1000).toFixed(0)}s`;
+  $('disk').hidden = false;
+  if (data.disk) {
+    const { free, total } = data.disk;
+    $('free').textContent = fmt(free); $('total').textContent = fmt(total);
+    const gain = Math.min(data.totals.safe + data.totals.reinstall, total - free);
+    $('usedBar').style.width = ((total - free - gain) / total * 100) + '%';
+    $('gainBar').style.width = (gain / total * 100) + '%';
+  }
+  $('tSafe').textContent = fmt(data.totals.safe);
+  $('tRe').textContent = fmt(data.totals.reinstall);
+  $('tRev').textContent = fmt(data.totals.review);
+  $('errors').innerHTML = (isStale() ? '<div class="stale">This scan is over an hour old. Sizes may have changed. Scan again before cleaning.</div>' : '')
+    + data.errors.map((e) => `<div class="err">${esc(e)}</div>`).join('');
+
+  $('list').innerHTML = TIERS.map(([tier, title, blurb]) => {
+    const items = data.items.filter((i) => i.tier === tier);
+    const rows = items.map((i) => {
+      const box = i.action.kind === 'reveal' ? '' : `<input type="checkbox" data-id="${esc(i.id)}" ${i.selectable ? '' : 'disabled'} ${selected.has(i.id) ? 'checked' : ''} aria-label="Select ${esc(i.title)}">`;
+      const paths = i.paths.slice(0, 3).map((p) => `<div class="path">${esc(tildePath(p))}</div>`).join('') + (i.paths.length > 3 ? `<div class="path">+${i.paths.length - 3} more</div>` : '');
+      return `<div class="row-item ${i.selectable || i.action.kind === 'reveal' ? '' : 'off'}">
+        <div>${box}</div>
+        <div><div class="t">${esc(i.title)}</div><div class="d">${esc(i.detail)}</div>${i.cost ? `<div class="c">${esc(i.cost)}</div>` : ''}${paths}</div>
+        <div class="right"><span class="size">${fmt(i.bytes)}</span>${i.blocked ? `<span class="pill">${esc(i.blocked)}</span>` : ''}${i.paths.length ? `<button class="link" data-reveal="${esc(i.id)}">Show in ${esc(settings?.platform?.fileManager || 'file manager')}</button>` : ''}</div>
+      </div>`;
+    }).join('');
+    return `<section><div class="shead"><h2>${title}</h2><p>${blurb}</p></div>${rows || '<div class="empty">Nothing here.</div>'}</section>`;
+  }).join('');
+  updateFoot();
+}
+
+function updateFoot() {
+  const bytes = data ? data.items.filter((i) => selected.has(i.id)).reduce((a, i) => a + (i.bytes || 0), 0) : 0;
+  $('selGB').textContent = fmt(bytes);
+  $('selN').textContent = selected.size;
+  $('cleanBtn').disabled = !selected.size || isStale();
+  $('allSafe').disabled = !data;
+  store.set([...selected]);
+}
+
+async function doScan() {
+  const b = $('scanBtn');
+  b.disabled = true; b.innerHTML = '<span class="spin"></span>Scanning…';
+  $('cleanBtn').disabled = true;
+  try {
+    data = await api('/api/scan');
+    for (const id of [...selected]) if (!data.items.find((i) => i.id === id && i.selectable)) selected.delete(id);
+    render();
+  } catch (e) {
+    $('errors').innerHTML = `<div class="err">${esc(e.message)}</div>`;
+  } finally { b.disabled = false; b.textContent = 'Scan'; }
+}
+
+// ---------- Schedule and launchers ----------
+const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+$('schedDay').innerHTML = DAYS.map((d, i) => `<option value="${i}">${d}</option>`).join('');
+$('schedHour').innerHTML = Array.from({ length: 24 }, (_, h) => `<option value="${h}">${String(h).padStart(2,'0')}:07</option>`).join('');
+let draftMode = 'off';
+
+function renderSettings() {
+  if (!settings) return;
+  // Panels only show for features this OS supports.
+  $('schedPanel').hidden = !settings.schedule;
+  $('launchPanel').hidden = !settings.launchers;
+  $('panels').hidden = !settings.schedule && !settings.launchers;
+  if (settings.schedule) renderSchedule();
+  if (settings.launchers) renderLaunchers();
+}
+function renderSchedule() {
+  const s = settings.schedule;
+  $('schedNow').textContent = s.text;
+  $('schedWarn').hidden = !s.warning; $('schedWarn').textContent = s.warning || '';
+  draftMode = s.mode;
+  if (s.day != null) $('schedDay').value = s.day;
+  if (s.hour != null) $('schedHour').value = s.hour;
+  syncSchedControls();
+  $('schedSave').disabled = true;
+}
+function renderLaunchers() {
+  const a = settings.launchers.app;
+  $('appStatus').innerHTML = !a.installed ? 'Not created. Opens from Spotlight, Launchpad or the Dock.'
+    : a.current ? `<span class="ok">Installed in ${esc(a.folder)}</span>`
+    : 'Installed, but points at an old Node or folder. Rebuild it.';
+  if (a.legacy) $('appStatus').innerHTML += `<br><span class="warnline">Old “Mac Sweep” app at ${esc(a.legacy)} no longer works after the rename. Delete it.</span>`;
+  $('appBtn').textContent = !a.installed ? 'Create app' : a.current ? 'Rebuild and show' : 'Rebuild app';
+
+  const sc = settings.launchers.shortcut;
+  $('scStatus').innerHTML = !sc.available ? 'Shortcuts isn’t available on this Mac.'
+    : sc.installed ? '<span class="ok">Added as “Safe Sweep”. Pin it to the menu bar from its details.</span>'
+    : 'Shortcuts asks you to confirm. Needs Settings → Advanced → Allow Running Scripts.';
+  if (sc.legacy) $('scStatus').innerHTML += '<br><span class="warnline">Old “Mac Sweep” shortcut no longer works after the rename. Delete it in Shortcuts.</span>';
+  $('scBtn').disabled = !sc.available;
+  $('scBtn').textContent = sc.installed ? 'Add again' : 'Add to Shortcuts';
+}
+function syncSchedControls() {
+  document.querySelectorAll('.seg button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === draftMode)));
+  $('schedDay').hidden = draftMode !== 'weekly';
+  $('schedHour').hidden = draftMode === 'off';
+}
+function markDirty() {
+  const s = settings.schedule;
+  const same = draftMode === s.mode && (draftMode === 'off' || (Number($('schedHour').value) === s.hour && (draftMode !== 'weekly' || Number($('schedDay').value) === s.day)));
+  $('schedSave').disabled = same;
+}
+document.querySelectorAll('.seg button').forEach((b) => b.onclick = () => { draftMode = b.dataset.mode; syncSchedControls(); markDirty(); });
+$('schedDay').onchange = markDirty;
+$('schedHour').onchange = markDirty;
+$('schedSave').onclick = async () => {
+  const btn = $('schedSave'); btn.disabled = true; btn.innerHTML = '<span class="spin"></span>Saving';
+  try { settings = await api('/api/schedule', { mode: draftMode, day: Number($('schedDay').value), hour: Number($('schedHour').value) }); renderSettings(); }
+  catch (e) { alert(e.message); btn.disabled = false; }
+  finally { btn.textContent = 'Save'; }
+};
+async function launcher(kind, btn) {
+  const label = btn.textContent; btn.disabled = true; btn.innerHTML = '<span class="spin"></span>Working';
+  try { settings = await api('/api/launcher', { kind }); renderSettings(); }
+  catch (e) { alert(e.message); btn.textContent = label; }
+  finally { btn.disabled = false; }
+}
+$('appBtn').onclick = () => {
+  const a = settings?.launchers.app;
+  if (a?.installed && a.current) return api('/api/launcher', { kind: 'app' }).then((s) => { settings = s; renderSettings(); }).catch((e) => alert(e.message));
+  launcher('app', $('appBtn'));
+};
+$('scBtn').onclick = () => launcher('shortcut', $('scBtn'));
+$('scanBtn').onclick = doScan;
+$('stopBtn').onclick = async () => {
+  const b = $('stopBtn'); b.disabled = true;
+  try { await api('/api/stop'); }
+  catch (e) { b.disabled = false; return alert(e.message); }
+  // The server is gone; leave a clear note instead of a page full of dead buttons.
+  document.querySelector('.wrap').innerHTML = `<h1>Safe Sweep</h1><div class="stopped"><b>Stopped.</b><span>Your last scan is saved. Open Safe Sweep again from the app, the shortcut, or <code>safe-sweep</code> in a terminal.</span></div>`;
+  document.querySelector('.foot').remove();
+};
+$('list').addEventListener('change', (e) => {
+  const id = e.target.dataset?.id; if (!id) return;
+  e.target.checked ? selected.add(id) : selected.delete(id);
+  updateFoot();
+});
+$('list').addEventListener('click', (e) => {
+  const id = e.target.dataset?.reveal; if (!id) return;
+  api('/api/reveal', { id }).catch((err) => alert(err.message));
+});
+$('allSafe').onclick = () => {
+  data.items.filter((i) => i.tier === 'safe' && i.selectable).forEach((i) => selected.add(i.id));
+  render();
+};
+$('cleanBtn').onclick = () => {
+  const items = data.items.filter((i) => selected.has(i.id));
+  $('confirmList').innerHTML = items.map((i) => `<li>${esc(i.title)} · <b>${fmt(i.bytes)}</b></li>`).join('');
+  $('go').textContent = `Delete ${fmt(items.reduce((a, i) => a + (i.bytes || 0), 0))}`;
+  $('confirm').showModal();
+};
+$('cancel').onclick = () => $('confirm').close();
+$('go').onclick = async () => {
+  const go = $('go'); go.disabled = true; go.innerHTML = '<span class="spin"></span>Cleaning…';
+  try {
+    const r = await api('/api/clean', { ids: [...selected] });
+    $('confirm').close();
+    const ok = r.results.filter((x) => x.ok);
+    const sum = (arr, k) => arr.reduce((a, x) => a + (x[k] || 0), 0);
+    const selectedB = sum(r.results, 'expected');
+    const removed = sum(ok, 'freed');
+    const docker = sum(ok.filter((x) => x.insideDocker), 'freed');
+    $('doneTitle').textContent = `Cleaned ${ok.length} of ${r.results.length}`;
+    $('doneSum').innerHTML = `<span>Selected</span><b>${fmt(selectedB)}</b>
+      <span>Removed</span><b>${fmt(removed)}</b>
+      <span>Disk free went up by</span><b>${r.diskFreed != null ? fmt(r.diskFreed) : '?'}</b>`;
+    const gap = r.diskFreed != null ? removed - r.diskFreed : 0;
+    const notes = [];
+    if (docker > 0 && gap > 0.5e9) notes.push(`${fmt(Math.min(docker, gap))} of the gap is likely inside Docker’s disk file. Quit and reopen Docker Desktop to get it back, then scan again.`);
+    if (gap > 0.5e9 && gap > docker + 0.5e9) notes.push('Some space may still be held by apps with files open or by APFS snapshots. It usually comes back within minutes.');
+    if (selectedB - removed > 0.5e9) notes.push('Some items freed less than their scanned size. Sizes drift between scan and clean, and a few files may have been in use.');
+    $('doneNote').innerHTML = notes.map((n) => `<div class="note">${esc(n)}</div>`).join('');
+    $('doneList').innerHTML = r.results.map((x) => x.ok
+      ? `<li class="res-ok">${esc(x.title)} · ${fmt(x.freed)}${x.expected && x.freed != null && x.expected - x.freed > 0.2e9 ? ` <span class="c">(scanned ${fmt(x.expected)})</span>` : ''}${x.insideDocker ? ' <span class="c">inside Docker</span>' : ''}</li>`
+      : `<li class="res-bad">${esc(x.title || x.id)} · ${esc(x.error)}</li>`).join('');
+    selected.clear(); store.set([]);
+    data = null; $('list').innerHTML = ''; $('disk').hidden = true; $('when').textContent = 'Cleaned. Scan again to see the new numbers.'; updateFoot();
+    $('done').showModal();
+  } catch (e) {
+    $('confirm').close();
+    alert(e.message);
+  } finally { go.disabled = false; }
+};
+$('doneOk').onclick = () => { $('done').close(); doScan(); };
+document.querySelectorAll('[data-close]').forEach((b) => b.onclick = () => b.closest('dialog').close());
+// Click outside a dialog closes it too.
+document.querySelectorAll('dialog').forEach((d) => d.addEventListener('click', (e) => {
+  if (e.target !== d) return; // clicks on the dialog's own padding also target it, so check the position
+  const r = d.getBoundingClientRect();
+  if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) d.close();
+}));
+
+(async function boot() {
+  try {
+    const st = await api('/api/state');
+    settings = { home: st.home, platform: st.platform, schedule: st.schedule, launchers: st.launchers };
+    renderSettings();
+    if (st.scan) {
+      data = st.scan;
+      for (const id of [...selected]) if (!data.items.find((i) => i.id === id && i.selectable)) selected.delete(id);
+      render();
+    } else { selected.clear(); updateFoot(); }
+  } catch (e) {
+    $('errors').innerHTML = `<div class="err">${esc(e.message)}</div>`;
+  }
+})();
+</script>
+</body>
+</html>

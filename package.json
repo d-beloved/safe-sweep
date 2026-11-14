@@ -1,0 +1,42 @@
+{
+  "name": "safe-sweep",
+  "version": "0.1.0",
+  "description": "Find disk space you can free on a developer's machine, and delete only what you tick. Local web page, allowlisted deletes, no network, no telemetry.",
+  "type": "module",
+  "bin": {
+    "safe-sweep": "./bin/safe-sweep.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "start": "node bin/safe-sweep.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "macos",
+    "disk-space",
+    "cleanup",
+    "cache",
+    "node_modules",
+    "docker",
+    "developer-tools"
+  ],
+  "author": "Ayodeji Moronkeji (https://morayodeji.dev)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/d-beloved/safe-sweep.git"
+  },
+  "bugs": {
+    "url": "https://github.com/d-beloved/safe-sweep/issues"
+  },
+  "homepage": "https://github.com/d-beloved/safe-sweep#readme",
+  "private": true
+}
