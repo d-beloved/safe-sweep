@@ -27,12 +27,13 @@ This tool deletes files on people's machines. Treat anything that deletes as hig
 
 ## Status and next steps
 
-1. **First run on a real Mac after the restructure.** The core/platform split, the rename from mac-sweep and the migration were tested only in a Linux sandbox with stand-ins for `launchctl`, `osacompile`, `shortcuts` and `docker`. Check: settings copied from `~/.mac-sweep`, the old schedule flagged and replaced on Save, the app and shortcut built under the new name, a real scan and clean.
-2. **GitHub.** Push to `d-beloved/safe-sweep`, private first; make it public after step 1. Watch the first CI run (macOS and Ubuntu, Node 20 and 22).
+1. **First run on a real Mac: done 2026-11-14** (macOS 26, Node 24). Settings copied from `~/.mac-sweep`, real scan, real clean (app logs), real launchd schedule and scheduled check, app built in `/Applications`, shortcut signed. The old-schedule replace was tested with a stand-in `launchctl`, since no old job was installed. Two fixes came out of it: Save now works on a flagged schedule, and `check` skips report-only rules (macOS held background reads of WhatsApp's folder).
+2. **GitHub.** Pushed to `d-beloved/safe-sweep` as private on 2026-11-14. Make it public once the first CI run is green and the owner agrees.
 3. **Linux platform** (`src/platform/linux`). The CONTRIBUTING.md notes list what's known. Testable on Linux directly.
 4. **Windows** later, and only with testing on a real Windows machine.
 
 ## Known quirks
 
 - After the rename, `safe-sweep` must be linked again with `npm link` from this folder. The old `mac-sweep` command keeps working from its own folder until removed.
+- Scheduled runs under launchd have none of Terminal's privacy permissions. Keep `check` away from other apps' private folders (`Group Containers`, `Containers`): mark such rules `reportOnly`.
 - Shortcuts needs Settings → Advanced → Allow Running Scripts. The hand-built shortcut file may be rejected by `shortcuts sign` on some macOS versions; the app is the fallback.
