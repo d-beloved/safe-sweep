@@ -296,6 +296,10 @@ function renderSettings() {
   $('panels').hidden = !settings.schedule && !settings.launchers;
   if (settings.schedule) renderSchedule();
   if (settings.launchers) renderLaunchers();
+  if (settings.temporary) { // run through npx: nothing permanent may point at a temporary folder
+    $('schedWarn').hidden = false; $('schedWarn').textContent = settings.temporary;
+    for (const id of ['schedSave', 'appBtn', 'scBtn']) $(id).disabled = true;
+  }
 }
 function renderSchedule() {
   const s = settings.schedule;
@@ -334,7 +338,8 @@ function syncSchedControls() {
 function markDirty() {
   const s = settings.schedule;
   const same = draftMode === s.mode && (draftMode === 'off' || (Number($('schedHour').value) === s.hour && (draftMode !== 'weekly' || Number($('schedDay').value) === s.day)));
-  $('schedSave').disabled = same && !s.warning;
+  // Through npx only turning a schedule off is allowed.
+  $('schedSave').disabled = (same && !s.warning) || (!!settings.temporary && draftMode !== 'off');
 }
 document.querySelectorAll('.seg button').forEach((b) => b.onclick = () => { draftMode = b.dataset.mode; syncSchedControls(); markDirty(); });
 $('schedDay').onchange = markDirty;

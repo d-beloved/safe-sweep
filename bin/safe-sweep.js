@@ -6,6 +6,7 @@ import { loadConfig } from '../src/core/config.js';
 import { scan } from '../src/core/scan.js';
 import { startServer, IDLE_MINUTES } from '../src/core/server.js';
 import { fmt, STATE_DIR } from '../src/core/util.js';
+import { TEMPORARY } from '../src/core/schedule.js';
 const [cmd = 'ui', ...rest] = process.argv.slice(2);
 const flag = (name) => rest.includes(`--${name}`);
 const opt = (name, dflt) => { const i = rest.indexOf(`--${name}`); return i >= 0 ? rest[i + 1] : dflt; };
@@ -31,6 +32,7 @@ async function main() {
   }
   const cfg = await loadConfig();
   if (cfg.migrated) console.log('Copied your settings and history from ~/.mac-sweep to ~/.safe-sweep.');
+  if (TEMPORARY && cmd === 'ui') console.log('Running through npx. Scan and clean work. To set a schedule or launcher, install it: npm i -g safe-sweep');
 
   if (cmd === 'ui') {
     const url = `http://127.0.0.1:${cfg.port}/`;

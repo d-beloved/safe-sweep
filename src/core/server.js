@@ -6,6 +6,7 @@ import { scan } from './scan.js';
 import { clean } from './clean.js';
 import { STATE_DIR, HOME } from './util.js';
 import { platform } from '../platform/index.js';
+import { TEMPORARY, TEMPORARY_MSG, needsInstall } from './schedule.js';
 
 const UI = new URL('./ui.html', import.meta.url);
 const SCAN_FILE = path.join(STATE_DIR, 'last-scan.json');
@@ -40,7 +41,8 @@ export async function startServer(cfg, { onListening } = {}) {
     req.on('end', () => { try { resolve(s ? JSON.parse(s) : {}); } catch (e) { reject(e); } });
   });
   const settings = async () => {
-    const out = { home: HOME, platform: { id: platform.id, name: platform.name, fileManager: platform.fileManager }, schedule: null, launchers: null };
+    const out = { home: HOME, platform: { id: platform.id, name: platform.name, fileManager: platform.fileManager }, schedule: null, launchers: null,
+      temporary: TEMPORARY ? TEMPORARY_MSG : null };
     if (platform.schedule) {
       const s = await platform.schedule.read();
       out.schedule = { ...s, text: platform.schedule.describe(s) };
@@ -116,9 +118,11 @@ export async function startServer(cfg, { onListening } = {}) {
         case '/api/launcher': {
           if (body.kind === 'app') {
             if (!platform.launchers) return send(res, 400, { error: 'Not supported on this OS yet' });
+            needsInstall();
             await platform.launchers.createApp();
           } else if (body.kind === 'shortcut') {
             if (!platform.launchers?.createShortcut) return send(res, 400, { error: 'Not supported on this OS yet' });
+            needsInstall();
             await platform.launchers.createShortcut();
           } else return send(res, 400, { error: 'Unknown launcher' });
           return send(res, 200, await settings());

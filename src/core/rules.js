@@ -21,6 +21,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { HOME, run, has, du, ls, exists, parseSize } from './util.js';
+import { TEMPORARY } from './schedule.js';
 
 const H = (...p) => path.join(HOME, ...p);
 
@@ -88,6 +89,8 @@ async function pkgCaches() {
   if (await exists(npx)) {
     out.push(item({ id: 'npx-cache', tier: 'safe', title: 'npx download cache', bytes: await du(npx), paths: [npx],
       detail: 'Packages fetched by one-off npx runs.', cost: 'Next npx run of each tool re-downloads it.',
+      // Never pull the floor out from under ourselves when run through npx.
+      blocked: TEMPORARY ? 'safe-sweep is running from here' : null,
       action: { kind: 'rm', paths: [npx] } }));
   }
   const tools = [

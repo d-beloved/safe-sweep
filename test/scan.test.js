@@ -14,3 +14,9 @@ test('a scheduled check skips report-only rules and keeps the rest', () => {
   assert.ok(!background.includes('dockerDisk'), 'dockerDisk reads Docker’s container');
   assert.deepEqual(all.filter((n) => !background.includes(n)).sort(), ['dockerDisk', 'reviewItems']);
 });
+
+test('a normal install is not treated as an npx run', async () => {
+  const { TEMPORARY, checkInput } = await import('../src/core/schedule.js');
+  assert.equal(TEMPORARY, false);
+  assert.deepEqual(checkInput({ mode: 'daily', hour: 9 }), { mode: 'daily', day: 1, hour: 9 });
+});

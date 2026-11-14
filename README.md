@@ -4,21 +4,23 @@ Find disk space you can free on your machine, and delete only what you tick.
 
 safe-sweep scans for caches, build leftovers and dormant `node_modules`, sorts them by how safe they are to remove, and shows you the sizes. Nothing is deleted until you tick it and confirm. It runs as a small page on your own machine: no account, no network calls, no telemetry.
 
-![safe-sweep after a scan](docs/screenshot.png)
+![safe-sweep after a scan](https://raw.githubusercontent.com/d-beloved/safe-sweep/main/docs/screenshot.png)
 <sub>Screenshot uses sample sizes.</sub>
 
-**Platforms:** macOS and Linux. See [Platform support](#platform-support).
+**Platforms:** macOS and Linux. Linux support is new: please [open an issue](https://github.com/d-beloved/safe-sweep/issues) if something looks wrong. See [Platform support](#platform-support).
 
 ## Install
 
 Needs Node 20 or newer. No dependencies.
 
 ```bash
-git clone https://github.com/d-beloved/safe-sweep.git
-cd safe-sweep
-npm link        # puts `safe-sweep` on your PATH
+npm install -g safe-sweep
 safe-sweep      # opens the Scan page in your browser
 ```
+
+To try it once without installing, run `npx safe-sweep`. Scan and clean work the same. A schedule or launcher needs the installed version, because npx runs from a temporary folder.
+
+To work on the code, clone the repo and run `npm link` in it instead.
 
 The first run creates `~/.safe-sweep/config.json`. On macOS, Terminal may ask for access to Desktop or Documents. Allow it, or projects there won't be found.
 

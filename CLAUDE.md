@@ -30,10 +30,12 @@ This tool deletes files on people's machines. Treat anything that deletes as hig
 1. **First run on a real Mac: done 2026-11-14** (macOS 26, Node 24). Settings copied from `~/.mac-sweep`, real scan, real clean (app logs), real launchd schedule and scheduled check, app built in `/Applications`, shortcut signed. The old-schedule replace was tested with a stand-in `launchctl`, since no old job was installed. Two fixes came out of it: Save now works on a flagged schedule, and `check` skips report-only rules (macOS held background reads of WhatsApp's folder).
 2. **GitHub.** `d-beloved/safe-sweep`, made public on 2026-11-14 after a check for personal details.
 3. **Linux platform: built 2026-11-14** (`src/platform/linux`): named `~/.cache` folders, Chrome AI model, report-only package caches and journal, systemd user timer, `.desktop` menu entry. Tested with `SAFE_SWEEP_PLATFORM=linux` in a temp home on macOS and in CI on Ubuntu. Still to do: a first run on a real Linux desktop (schedule via real systemd, notify-send, menu entry showing in the launcher).
-4. No Windows support is planned for now.
+4. **npm.** Package `safe-sweep` prepared 2026-11-14 (`private` removed, `os` set to darwin and linux). Publish with `npm publish` from this folder; bump with `npm version patch|minor` first for later releases.
+5. No Windows support is planned for now.
 
 ## Known quirks
 
+- Run through `npx`, the code lives in `~/.npm/_npx`. Schedules and launchers are refused there (`needsInstall` in `src/core/schedule.js`) and the npx cache item is blocked, so nothing points at or deletes the running copy.
 - After the rename, `safe-sweep` must be linked again with `npm link` from this folder. The old `mac-sweep` command keeps working from its own folder until removed.
 - Scheduled runs under launchd have none of Terminal's privacy permissions. Keep `check` away from other apps' private folders (`Group Containers`, `Containers`): mark such rules `reportOnly`.
 - Shortcuts needs Settings → Advanced → Allow Running Scripts. The hand-built shortcut file may be rejected by `shortcuts sign` on some macOS versions; the app is the fallback.

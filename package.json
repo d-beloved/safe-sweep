@@ -20,13 +20,15 @@
     "node": ">=20"
   },
   "keywords": [
-    "macos",
     "disk-space",
     "cleanup",
     "cache",
     "node_modules",
     "docker",
-    "developer-tools"
+    "macos",
+    "linux",
+    "developer-tools",
+    "cli"
   ],
   "author": "Ayodeji Moronkeji (https://morayodeji.dev)",
   "license": "MIT",
@@ -38,5 +40,8 @@
     "url": "https://github.com/d-beloved/safe-sweep/issues"
   },
   "homepage": "https://github.com/d-beloved/safe-sweep#readme",
-  "private": true
+  "os": [
+    "darwin",
+    "linux"
+  ]
 }
