@@ -159,4 +159,9 @@ export const ALLOW = [
 // Never on macOS, even if a pattern above matches.
 export const DENY = [/group\.net\.whatsapp/i, /CloudStorage/, /Mobile Documents/];
 
+// Report-only rules read private folders (WhatsApp, Docker). A scheduled check skips them:
+// macOS asks before a background job reads another app's data, and the check doesn't need them.
+dockerDisk.reportOnly = true;
+reviewItems.reportOnly = true;
+
 export const RULES = [appCaches, reinstallItems, dockerDisk, reviewItems];

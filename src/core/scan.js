@@ -2,10 +2,15 @@ import { RULES } from './rules.js';
 import { diskFree } from './util.js';
 import { platform } from '../platform/index.js';
 
+/** The rules to run. Without reportOnly, rules marked reportOnly (they only list things to review) are left out. */
+export function rulesFor({ reportOnly = true } = {}) {
+  return [...RULES, ...(platform?.rules || [])].filter((r) => reportOnly || !r.reportOnly);
+}
+
 /** Run every rule. One failing rule never sinks the scan. */
-export async function scan(cfg) {
+export async function scan(cfg, opts) {
   const started = Date.now();
-  const rules = [...RULES, ...(platform?.rules || [])];
+  const rules = rulesFor(opts);
   const results = await Promise.all(rules.map(async (rule) => {
     try { return { items: await rule(cfg) }; }
     catch (e) { return { items: [], error: `${rule.name}: ${e.message}` }; }

@@ -2,6 +2,8 @@
 //
 //   id, name, fileManager
 //   rules        array of async (cfg) => items[]   (added to the shared rules)
+//                set rule.reportOnly = true on rules that only list things to review;
+//                scheduled checks skip them
 //   allow, deny  RegExp[] matched against paths relative to home
 //   blockedBy(...appKeys)  returns "Quit X first" or null
 //   notify(title, message), reveal(path), openUrl(url)

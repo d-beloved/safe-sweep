@@ -58,7 +58,9 @@ async function main() {
   }
 
   if (cmd === 'check') {
-    const r = await scan(cfg);
+    // Only the totals matter here. Skipping report-only rules keeps a background run
+    // out of other apps' private folders, which macOS would otherwise ask about.
+    const r = await scan(cfg, { reportOnly: false });
     const freeGB = r.disk ? r.disk.free / 1e9 : Infinity;
     const safeGB = r.totals.safe / 1e9;
     const line = `${fmt(r.disk?.free)} free · ${fmt(r.totals.safe)} safe to clear · ${fmt(r.totals.reinstall)} more with reinstalls`;
