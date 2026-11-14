@@ -35,6 +35,7 @@ This tool deletes files on people's machines. Treat anything that deletes as hig
 
 ## Known quirks
 
+- Keep `bin` in package.json as `bin/safe-sweep.js`, without `./`. npm 11 silently drops a `./` bin entry at publish (0.1.0 shipped without the command). Run `npm publish --dry-run` and check for warnings before a release.
 - Run through `npx`, the code lives in `~/.npm/_npx`. Schedules and launchers are refused there (`needsInstall` in `src/core/schedule.js`) and the npx cache item is blocked, so nothing points at or deletes the running copy.
 - After the rename, `safe-sweep` must be linked again with `npm link` from this folder. The old `mac-sweep` command keeps working from its own folder until removed.
 - Scheduled runs under launchd have none of Terminal's privacy permissions. Keep `check` away from other apps' private folders (`Group Containers`, `Containers`): mark such rules `reportOnly`.
