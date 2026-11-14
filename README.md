@@ -14,7 +14,7 @@ safe-sweep scans for caches, build leftovers and dormant `node_modules`, sorts t
 
 ## Install
 
-Needs Node 20 or newer. No dependencies.
+Published on npm as [@d-beloved/safe-sweep](https://www.npmjs.com/package/@d-beloved/safe-sweep). Needs Node 20 or newer. No dependencies.
 
 ```bash
 npm install -g @d-beloved/safe-sweep
