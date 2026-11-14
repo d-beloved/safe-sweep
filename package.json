@@ -1,7 +1,7 @@
 {
   "name": "safe-sweep",
   "version": "0.1.0",
-  "description": "Find disk space you can free on a developer's machine, and delete only what you tick. Local web page, allowlisted deletes, no network, no telemetry.",
+  "description": "Find disk space you can free on your machine, and delete only what you tick. Local web page, allowlisted deletes, no network, no telemetry.",
   "type": "module",
   "bin": {
     "safe-sweep": "./bin/safe-sweep.js"
