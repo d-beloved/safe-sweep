@@ -4,8 +4,11 @@ Find disk space you can free on your machine, and delete only what you tick.
 
 safe-sweep scans for caches, build leftovers and dormant `node_modules`, sorts them by how safe they are to remove, and shows you the sizes. Nothing is deleted until you tick it and confirm. It runs as a small page on your own machine: no account, no network calls, no telemetry.
 
-![safe-sweep after a scan](https://raw.githubusercontent.com/d-beloved/safe-sweep/main/docs/screenshot.png)
-<sub>Screenshot uses sample sizes.</sub>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/d-beloved/safe-sweep/main/docs/screenshot-dark.png">
+  <img alt="safe-sweep after a scan" src="https://raw.githubusercontent.com/d-beloved/safe-sweep/main/docs/screenshot.png">
+</picture>
+<sub>Screenshot uses sample sizes. The page follows your system’s light or dark setting.</sub>
 
 **Platforms:** macOS and Linux. Linux support is new: please [open an issue](https://github.com/d-beloved/safe-sweep/issues) if something looks wrong. See [Platform support](#platform-support).
 
