@@ -4,7 +4,7 @@
   "description": "Find disk space you can free on your machine, and delete only what you tick. Local web page, allowlisted deletes, no network, no telemetry.",
   "type": "module",
   "bin": {
-    "safe-sweep": "./bin/safe-sweep.js"
+    "safe-sweep": "bin/safe-sweep.js"
   },
   "files": [
     "bin",
