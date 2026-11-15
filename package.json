@@ -39,7 +39,7 @@
   "bugs": {
     "url": "https://github.com/d-beloved/safe-sweep/issues"
   },
-  "homepage": "https://github.com/d-beloved/safe-sweep#readme",
+  "homepage": "https://d-beloved.github.io/safe-sweep/",
   "os": [
     "darwin",
     "linux"
