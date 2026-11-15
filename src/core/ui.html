@@ -99,7 +99,10 @@
   @keyframes s{to{transform:rotate(1turn)}}
   @media (prefers-reduced-motion:reduce){.spin{animation:none}}
   .hbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .seg.theme button{padding:6px 10px;font-size:13px}
+  .seg.theme button{padding:11px 10px;line-height:0;color:var(--soft)}
+  .seg.theme button:hover{color:var(--ink)}
+  .seg.theme button[aria-pressed=true]{color:var(--accent-ink)}
+  .seg.theme svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   .stopped{margin-top:24px;background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:24px;text-align:center}
   .stopped b{display:block;font-size:18px;margin-bottom:4px}
   .stopped span{color:var(--soft);font-size:14px}
@@ -132,9 +135,9 @@
     </div>
     <div class="hbtns">
       <div class="seg theme" role="group" aria-label="Theme">
-        <button type="button" data-theme="auto" title="Match the system setting">Auto</button>
-        <button type="button" data-theme="light">Light</button>
-        <button type="button" data-theme="dark">Dark</button>
+        <button type="button" data-theme="auto" title="Match the system setting" aria-label="Match the system setting"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button>
+        <button type="button" data-theme="light" title="Light" aria-label="Light"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+        <button type="button" data-theme="dark" title="Dark" aria-label="Dark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
       </div>
       <button id="stopBtn" title="Shut down the Safe Sweep server">Stop</button>
       <button class="primary" id="scanBtn">Scan</button>
