@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Safe Sweep</title>
+<script>
+  // Apply the saved theme before the page paints, so it never flashes the wrong colours.
+  try { const t = localStorage.getItem('sweep.theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch {}
+</script>
 <style>
   [hidden]{display:none !important}
   :root{
@@ -11,14 +15,24 @@
     --accent:#1F5E4A; --accent-ink:#FFFFFF; --safe:#1F7A4D; --safe-bg:#E1F1E7;
     --warn:#8A5A00; --warn-bg:#F6EBD3; --info:#4A5A78; --info-bg:#E6EAF2; --bad:#A3362E; --bad-bg:#F6E1DE;
     --bar:#E7E2D7; --used:#2B2A26;
+    color-scheme:light;
   }
+  /* Dark colours: follow the system unless the page is set to light, or always when set to dark. Keep both blocks in step. */
   @media (prefers-color-scheme: dark){
-    :root{
+    :root:not([data-theme=light]){
       --bg:#121311; --card:#1B1C1A; --ink:#ECEAE4; --soft:#B3AFA5; --faint:#7E7A70; --rule:#2C2D2A;
       --accent:#5CC29B; --accent-ink:#0F1A15; --safe:#6FCF9B; --safe-bg:#1A2E23;
       --warn:#E3B45C; --warn-bg:#33291A; --info:#9DB0D6; --info-bg:#1F2533; --bad:#E8857C; --bad-bg:#352120;
       --bar:#2A2B28; --used:#D9D6CE;
+      color-scheme:dark;
     }
+  }
+  :root[data-theme=dark]{
+    --bg:#121311; --card:#1B1C1A; --ink:#ECEAE4; --soft:#B3AFA5; --faint:#7E7A70; --rule:#2C2D2A;
+    --accent:#5CC29B; --accent-ink:#0F1A15; --safe:#6FCF9B; --safe-bg:#1A2E23;
+    --warn:#E3B45C; --warn-bg:#33291A; --info:#9DB0D6; --info-bg:#1F2533; --bad:#E8857C; --bad-bg:#352120;
+    --bar:#2A2B28; --used:#D9D6CE;
+    color-scheme:dark;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
@@ -84,7 +98,8 @@
   .spin{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:s .8s linear infinite;vertical-align:-2px;margin-right:6px}
   @keyframes s{to{transform:rotate(1turn)}}
   @media (prefers-reduced-motion:reduce){.spin{animation:none}}
-  .hbtns{display:flex;gap:8px}
+  .hbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .seg.theme button{padding:6px 10px;font-size:13px}
   .stopped{margin-top:24px;background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:24px;text-align:center}
   .stopped b{display:block;font-size:18px;margin-bottom:4px}
   .stopped span{color:var(--soft);font-size:14px}
@@ -116,6 +131,11 @@
       <div class="sub" id="when">Not scanned yet.</div>
     </div>
     <div class="hbtns">
+      <div class="seg theme" role="group" aria-label="Theme">
+        <button type="button" data-theme="auto" title="Match the system setting">Auto</button>
+        <button type="button" data-theme="light">Light</button>
+        <button type="button" data-theme="dark">Dark</button>
+      </div>
       <button id="stopBtn" title="Shut down the Safe Sweep server">Stop</button>
       <button class="primary" id="scanBtn">Scan</button>
     </div>
@@ -331,7 +351,7 @@ function renderLaunchers() {
   $('scBtn').textContent = sc.installed ? 'Add again' : 'Add to Shortcuts';
 }
 function syncSchedControls() {
-  document.querySelectorAll('.seg button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === draftMode)));
+  document.querySelectorAll('#schedPanel .seg button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === draftMode)));
   $('schedDay').hidden = draftMode !== 'weekly';
   $('schedHour').hidden = draftMode === 'off';
 }
@@ -341,7 +361,7 @@ function markDirty() {
   // Through npx only turning a schedule off is allowed.
   $('schedSave').disabled = (same && !s.warning) || (!!settings.temporary && draftMode !== 'off');
 }
-document.querySelectorAll('.seg button').forEach((b) => b.onclick = () => { draftMode = b.dataset.mode; syncSchedControls(); markDirty(); });
+document.querySelectorAll('#schedPanel .seg button').forEach((b) => b.onclick = () => { draftMode = b.dataset.mode; syncSchedControls(); markDirty(); });
 $('schedDay').onchange = markDirty;
 $('schedHour').onchange = markDirty;
 $('schedSave').onclick = async () => {
@@ -423,6 +443,17 @@ $('go').onclick = async () => {
   } finally { go.disabled = false; }
 };
 $('doneOk').onclick = () => { $('done').close(); doScan(); };
+function applyTheme(t) {
+  if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+  else { t = 'auto'; delete document.documentElement.dataset.theme; }
+  document.querySelectorAll('.seg.theme button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.theme === t)));
+  return t;
+}
+applyTheme(document.documentElement.dataset.theme);
+document.querySelectorAll('.seg.theme button').forEach((b) => b.onclick = () => {
+  const t = applyTheme(b.dataset.theme);
+  try { t === 'auto' ? localStorage.removeItem('sweep.theme') : localStorage.setItem('sweep.theme', t); } catch {}
+});
 document.querySelectorAll('[data-close]').forEach((b) => b.onclick = () => b.closest('dialog').close());
 // Click outside a dialog closes it too.
 document.querySelectorAll('dialog').forEach((d) => d.addEventListener('click', (e) => {
