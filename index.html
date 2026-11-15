@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>safe-sweep</title>
+<meta name="description" content="Find disk space you can free on your machine, and delete only what you tick. Runs locally on macOS and Linux. No account, no network calls, no telemetry.">
+<meta property="og:title" content="safe-sweep">
+<meta property="og:description" content="Find disk space you can free on your machine, and delete only what you tick.">
+<meta property="og:image" content="https://d-beloved.github.io/safe-sweep/social-preview.png">
+<meta property="og:url" content="https://d-beloved.github.io/safe-sweep/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231F5E4A'/%3E%3Cpath d='M9 17l5 5 9-11' stroke='white' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#F3F1EC; --card:#FFFFFF; --ink:#1B1A17; --soft:#5F5B52; --faint:#8F8A7E; --rule:#E2DDD2;
+    --accent:#1F5E4A; --accent-ink:#FFFFFF; --safe:#1F7A4D; --safe-bg:#E1F1E7;
+    --warn:#8A5A00; --warn-bg:#F6EBD3; --info:#4A5A78; --info-bg:#E6EAF2;
+    --code-bg:#1B1A17; --code-ink:#ECEAE4;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#121311; --card:#1B1C1A; --ink:#ECEAE4; --soft:#B3AFA5; --faint:#7E7A70; --rule:#2C2D2A;
+      --accent:#5CC29B; --accent-ink:#0F1A15; --safe:#6FCF9B; --safe-bg:#1A2E23;
+      --warn:#E3B45C; --warn-bg:#33291A; --info:#9DB0D6; --info-bg:#1F2533;
+      --code-bg:#0B0C0B; --code-ink:#ECEAE4;
+      color-scheme:dark;
+    }
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent)}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+  code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.9em}
+
+  /* top bar */
+  .top{display:flex;justify-content:space-between;align-items:center;padding:20px 0;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;color:var(--ink);text-decoration:none;letter-spacing:-.01em}
+  .brand svg{flex:none}
+  .nav{display:flex;gap:18px;font-size:14px}
+  .nav a{color:var(--soft);text-decoration:none}
+  .nav a:hover{color:var(--ink)}
+
+  /* hero */
+  .hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:48px;align-items:center;padding:48px 0 64px}
+  h1{font:700 clamp(34px,5vw,52px)/1.05 -apple-system,"SF Pro Display",system-ui,sans-serif;letter-spacing:-.03em;margin:0 0 18px}
+  .lede{font-size:18px;color:var(--soft);margin:0 0 28px;max-width:34em}
+  .platforms{font-size:13px;color:var(--faint);margin-top:14px}
+
+  .cmd{display:flex;align-items:center;gap:10px;background:var(--code-bg);color:var(--code-ink);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px 12px 12px 16px;font:14px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;max-width:100%}
+  .cmd + .cmd{margin-top:8px}
+  .cmd .p{color:#7E7A70;user-select:none}
+  .cmd code{flex:1;min-width:0;overflow-x:auto;white-space:nowrap;font-size:inherit}
+  .copy{flex:none;font:600 12px/1 -apple-system,system-ui,sans-serif;background:transparent;color:#B3AFA5;border:1px solid #3A3B37;border-radius:6px;padding:7px 10px;cursor:pointer}
+  .copy:hover{color:#fff;border-color:#6A6A64}
+  .copy:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .or{font-size:13px;color:var(--faint);margin:10px 0 8px}
+
+  .actions{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+  .btn{display:inline-block;font-weight:600;font-size:15px;border-radius:8px;padding:10px 18px;text-decoration:none;border:1px solid var(--rule);background:var(--card);color:var(--ink)}
+  .btn:hover{border-color:var(--faint)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+  .shot{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--rule);background:var(--card);box-shadow:0 1px 2px rgba(0,0,0,.04),0 12px 40px -12px rgba(0,0,0,.18);max-height:560px}
+  .shot img{display:block;width:100%;height:auto}
+  .shot::after{content:"";position:absolute;left:0;right:0;bottom:0;height:90px;background:linear-gradient(to bottom,transparent,var(--card))}
+  .shot-note{font-size:12px;color:var(--faint);margin-top:10px;text-align:center}
+
+  /* sections */
+  section{padding:56px 0;border-top:1px solid var(--rule)}
+  h2{font-size:26px;letter-spacing:-.02em;margin:0 0 8px;line-height:1.2}
+  .intro{color:var(--soft);margin:0 0 28px;max-width:40em}
+
+  .steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;counter-reset:s;padding:0;margin:0;list-style:none}
+  .steps li{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:20px}
+  .steps li::before{counter-increment:s;content:counter(s);display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:14px;margin-bottom:12px}
+  .steps b{display:block;margin-bottom:4px}
+  .steps p{margin:0;color:var(--soft);font-size:15px}
+
+  .lists{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+  .list{border-radius:12px;padding:20px}
+  .list h3{margin:0 0 6px;font-size:17px}
+  .list p{margin:0;font-size:14.5px}
+  .list .ex{margin-top:10px;font-size:13.5px;opacity:.85}
+  .list.safe{background:var(--safe-bg);color:var(--safe)}
+  .list.reinstall{background:var(--warn-bg);color:var(--warn)}
+  .list.review{background:var(--info-bg);color:var(--info)}
+
+  .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 32px;padding:0;margin:0;list-style:none}
+  .grid2 li{padding:14px 0;border-bottom:1px solid var(--rule)}
+  .grid2 b{display:block;margin-bottom:2px}
+  .grid2 span{color:var(--soft);font-size:15px}
+
+  .local{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:24px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:start}
+  .local svg{color:var(--accent)}
+  .local h3{margin:0 0 6px;font-size:18px}
+  .local p{margin:0;color:var(--soft)}
+
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  th,td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-size:13px;color:var(--faint);font-weight:600}
+  td:first-child{font-weight:600}
+  .tbl{overflow-x:auto}
+
+  footer{border-top:1px solid var(--rule);padding:28px 0 40px;color:var(--faint);font-size:14px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  footer a{color:var(--soft)}
+
+  @media (max-width:860px){
+    .hero{grid-template-columns:1fr;gap:36px;padding:28px 0 48px}
+    .steps,.lists{grid-template-columns:1fr}
+    .grid2{grid-template-columns:1fr;gap:0}
+  }
+  @media (max-width:520px){
+    .wrap{padding:0 16px}
+    .nav a.hide-sm{display:none}
+    .local{grid-template-columns:1fr}
+    section{padding:44px 0}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <a class="brand" href="./">
+      <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--accent)"/><path d="M9 17l5 5 9-11" stroke="var(--accent-ink)" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      safe-sweep
+    </a>
+    <nav class="nav">
+      <a class="hide-sm" href="#how">How it works</a>
+      <a class="hide-sm" href="#safety">Safety</a>
+      <a href="https://github.com/d-beloved/safe-sweep">GitHub</a>
+      <a href="https://www.npmjs.com/package/@d-beloved/safe-sweep">npm</a>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <div>
+      <h1>Free up disk space. Delete only what you tick.</h1>
+      <p class="lede">safe-sweep finds caches, build leftovers and old <code>node_modules</code> on your machine. It sorts them by how safe they are to remove and shows real sizes. Nothing is deleted until you tick it and confirm.</p>
+
+      <div class="cmd"><span class="p">$</span><code>npm install -g @d-beloved/safe-sweep</code><button class="copy" type="button" data-copy="npm install -g @d-beloved/safe-sweep">Copy</button></div>
+      <div class="cmd"><span class="p">$</span><code>safe-sweep</code><button class="copy" type="button" data-copy="safe-sweep">Copy</button></div>
+      <p class="or">Or try it once without installing:</p>
+      <div class="cmd"><span class="p">$</span><code>npx @d-beloved/safe-sweep</code><button class="copy" type="button" data-copy="npx @d-beloved/safe-sweep">Copy</button></div>
+
+      <p class="platforms">macOS and Linux · Node 20 or newer · No dependencies · MIT</p>
+    </div>
+
+    <div>
+      <div class="shot">
+        <picture>
+          <source media="(prefers-color-scheme: dark)" srcset="screenshot-dark.png">
+          <img src="screenshot.png" alt="The safe-sweep page after a scan, showing free space, three totals and a list of caches with sizes" width="1880" height="2480">
+        </picture>
+      </div>
+      <p class="shot-note">The page after a scan. Sample sizes.</p>
+    </div>
+  </div>
+
+  <section>
+    <div class="local">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+      <div>
+        <h3>It runs on your machine, not in the cloud</h3>
+        <p>safe-sweep is a small page served from your own computer at <code>127.0.0.1:4777</code>. There is no account, no sign-in, no network calls and no telemetry. This website only explains it. The tool itself never leaves your machine.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="how">
+    <h2>How it works</h2>
+    <p class="intro">Three steps. Sizes are measured, not estimated.</p>
+    <ol class="steps">
+      <li><b>Scan</b><p>Press Scan. safe-sweep measures caches, leftovers and dormant projects.</p></li>
+      <li><b>Tick</b><p>Tick what you want gone. Select all safe ticks the first list for you.</p></li>
+      <li><b>Clean</b><p>Confirm. You see what each item freed and how much free space you really gained.</p></li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Three lists, sorted by risk</h2>
+    <p class="intro">Every item lands in one of three lists, so you always know what a delete will cost you.</p>
+    <div class="lists">
+      <div class="list safe">
+        <h3>Safe to clear</h3>
+        <p>Caches and leftovers that rebuild themselves. Nothing of yours is lost.</p>
+        <p class="ex">Docker build cache, npm, yarn, pnpm, bun and uv caches, brew cleanup, browser and app caches.</p>
+      </div>
+      <div class="list reinstall">
+        <h3>Safe, costs a reinstall</h3>
+        <p>Comes back with a download or an install command.</p>
+        <p class="ex"><code>node_modules</code> in projects idle for 60 days with a committed lockfile, Hugging Face models, Chrome's on-device AI model.</p>
+      </div>
+      <div class="list review">
+        <h3>Your call</h3>
+        <p>Shown so you know where space went. Never deleted by safe-sweep.</p>
+        <p class="ex">Downloads, Trash, videos, old Node versions, installers, system package caches.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="safety">
+    <h2>Built to refuse first</h2>
+    <p class="intro">This tool deletes files, so the defaults lean hard towards saying no.</p>
+    <ul class="grid2">
+      <li><b>Allowlist</b><span>It deletes only inside a fixed list of paths. Anything else is refused, even if a rule asks for it.</span></li>
+      <li><b>Denylist</b><span>Every <code>.git</code> folder, chat data and cloud-synced folders are blocked, whatever else matches.</span></li>
+      <li><b>Symlinks checked</b><span>Paths are checked as written and with links resolved. A target that is a link is refused.</span></li>
+      <li><b>Open apps</b><span>It checks that an app is closed right before clearing its cache.</span></li>
+      <li><b>Careful with Docker</b><span>It never runs <code>docker image prune -a</code> or <code>docker volume prune</code>.</span></li>
+      <li><b>Logged</b><span>Every clean is written to a log. Run <code>safe-sweep log</code> to read it.</span></li>
+      <li><b>Local only</b><span>Bound to <code>127.0.0.1</code> with a Host check and a per-session token, so other websites can't trigger a clean.</span></li>
+      <li><b>Small, readable guard</b><span>The delete guard is about 40 lines and has its own tests. <a href="https://github.com/d-beloved/safe-sweep/blob/main/src/core/guard.js">Read it</a>.</span></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Commands</h2>
+    <p class="intro">The page does everything, but the terminal works too.</p>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">safe-sweep</td><td>Opens the page. Stops after 15 idle minutes.</td></tr>
+          <tr><td class="mono">safe-sweep scan</td><td>Prints the list in the terminal. Deletes nothing.</td></tr>
+          <tr><td class="mono">safe-sweep schedule weekly</td><td>Checks every week and notifies you if space is low. Never deletes.</td></tr>
+          <tr><td class="mono">safe-sweep log</td><td>Shows what was cleaned, when, and how much it freed.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="actions">
+      <a class="btn primary" href="https://github.com/d-beloved/safe-sweep#readme">Read the full guide</a>
+      <a class="btn" href="https://github.com/d-beloved/safe-sweep/issues">Report an issue</a>
+    </div>
+  </section>
+
+  <footer>
+    <span>safe-sweep · MIT license</span>
+    <span><a href="https://github.com/d-beloved/safe-sweep">GitHub</a> · <a href="https://www.npmjs.com/package/@d-beloved/safe-sweep">npm</a></span>
+  </footer>
+
+</div>
+<script>
+  document.querySelectorAll('.copy').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var text = b.getAttribute('data-copy');
+      var done = function () { b.textContent = 'Copied'; setTimeout(function () { b.textContent = 'Copy'; }, 1500); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () {});
+      }
+    });
+  });
+</script>
+</body>
+</html>
