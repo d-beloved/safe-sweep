@@ -22,6 +22,7 @@
     --accent:oklch(50% 0.095 188); --accent-ink:oklch(99.5% 0.003 100); --safe:oklch(40% 0.08 188); --safe-bg:oklch(94.5% 0.03 188);
     --warn:oklch(28% 0 0); --warn-bg:oklch(93.5% 0.006 100); --info:oklch(44% 0 0); --info-bg:transparent;
     --code-bg:oklch(16% 0 0); --code-ink:oklch(95% 0 0); --code-faint:oklch(62% 0 0); --code-line:oklch(32% 0 0); --code-line-hover:oklch(50% 0 0); --code-hover:oklch(100% 0 0);
+    --shot:url(screenshot.png);
     color-scheme:light;
   }
   @media (prefers-color-scheme: dark){
@@ -30,6 +31,7 @@
       --accent:oklch(74% 0.085 188); --accent-ink:oklch(17% 0.004 100); --safe:oklch(84% 0.07 188); --safe-bg:oklch(30% 0.045 190);
       --warn:oklch(90% 0 0); --warn-bg:oklch(26% 0.006 100); --info:oklch(72% 0 0); --info-bg:transparent;
       --code-bg:oklch(12.5% 0.003 100); --code-ink:oklch(95% 0 0); --code-faint:oklch(62% 0 0); --code-line:oklch(32% 0 0); --code-line-hover:oklch(50% 0 0); --code-hover:oklch(100% 0 0);
+      --shot:url(screenshot-dark.png);
       color-scheme:dark;
     }
   }
@@ -38,6 +40,7 @@
     --accent:oklch(74% 0.085 188); --accent-ink:oklch(17% 0.004 100); --safe:oklch(84% 0.07 188); --safe-bg:oklch(30% 0.045 190);
     --warn:oklch(90% 0 0); --warn-bg:oklch(26% 0.006 100); --info:oklch(72% 0 0); --info-bg:transparent;
     --code-bg:oklch(12.5% 0.003 100); --code-ink:oklch(95% 0 0); --code-faint:oklch(62% 0 0); --code-line:oklch(32% 0 0); --code-line-hover:oklch(50% 0 0); --code-hover:oklch(100% 0 0);
+    --shot:url(screenshot-dark.png);
     color-scheme:dark;
   }
   *{box-sizing:border-box}
@@ -52,7 +55,7 @@
   .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;color:var(--ink);text-decoration:none;letter-spacing:-.01em;white-space:nowrap}
   .brand svg{flex:none}
   .nav{display:flex;gap:18px;font-size:14px}
-  .nav a{color:var(--soft);text-decoration:none}
+  .nav a{color:var(--soft);text-decoration:none;white-space:nowrap}
   .nav a:hover{color:var(--ink)}
   .right{display:flex;align-items:center;gap:18px}
   .theme{display:inline-flex;border:1px solid var(--rule);border-radius:8px;overflow:hidden;background:var(--card)}
@@ -87,6 +90,22 @@
   .shot img{display:block;width:100%;height:auto}
   .shot::after{content:"";position:absolute;left:0;right:0;bottom:0;height:90px;background:linear-gradient(to bottom,transparent,var(--card))}
   .shot-note{font-size:12px;color:var(--faint);margin-top:10px;text-align:center}
+
+  /* no terminal after setup */
+  .noterm{display:flex;gap:12px;align-items:flex-start;background:var(--safe-bg);color:var(--safe);border-radius:10px;padding:12px 16px;margin:0 0 24px;font-size:15px;line-height:1.5;max-width:34em}
+  .noterm svg{flex:none;margin-top:2px}
+  .noterm a{color:inherit;font-weight:600}
+  .open{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;align-items:center}
+  .ways{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+  .ways li{display:grid;grid-template-columns:36px minmax(0,1fr);gap:14px;align-items:start;background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:16px}
+  .ways .ic{width:36px;height:36px;border-radius:9px;background:var(--safe-bg);color:var(--safe);display:grid;place-items:center}
+  .ways .ic svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .ways h3{margin:0 0 2px;font-size:16px}
+  .ways p{margin:0;color:var(--soft);font-size:15px}
+  .note{font-size:13px;color:var(--faint);margin:14px 0 0}
+  .panel-shot{margin:0}
+  .crop{aspect-ratio:434/186;width:100%;background:var(--card) var(--shot) no-repeat;background-size:216.59% auto;background-position:92.49% 9.3%;border:1px solid var(--rule);border-radius:12px;box-shadow:0 1px 2px rgba(0,0,0,.04),0 12px 40px -12px rgba(0,0,0,.18)}
+  .panel-shot figcaption{font-size:12px;color:var(--faint);margin-top:10px;text-align:center}
 
   /* sections */
   section{padding:56px 0;border-top:1px solid var(--rule)}
@@ -132,6 +151,10 @@
     .hero{grid-template-columns:minmax(0,1fr);gap:36px;padding:28px 0 48px}
     .steps,.lists{grid-template-columns:minmax(0,1fr)}
     .grid2{grid-template-columns:minmax(0,1fr);gap:0}
+    .open{grid-template-columns:minmax(0,1fr);gap:32px}
+  }
+  @media (max-width:700px){
+    .nav a.hide-md{display:none}
   }
   @media (max-width:520px){
     .wrap{padding:0 16px}
@@ -155,7 +178,8 @@
     </a>
     <div class="right">
       <nav class="nav">
-        <a class="hide-sm" href="#how">How it works</a>
+        <a class="hide-sm" href="#open">Open as an app</a>
+        <a class="hide-sm hide-md" href="#how">How it works</a>
         <a class="hide-sm" href="#safety">Safety</a>
         <a href="https://github.com/d-beloved/safe-sweep">GitHub</a>
         <a class="hide-xs" href="https://www.npmjs.com/package/@d-beloved/safe-sweep">npm</a>
@@ -172,6 +196,8 @@
     <div>
       <h1>Free up disk space. Delete only what you tick.</h1>
       <p class="lede">safe-sweep finds caches, build leftovers and old <code>node_modules</code> on your machine. It sorts them by how safe they are to remove and shows real sizes. Nothing is deleted until you tick it and confirm.</p>
+
+      <p class="noterm"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 12l3 3 5-6"/></svg><span><b>No terminal after setup.</b> One button on the page makes Safe Sweep a Mac app or a Shortcut, or a menu entry on Linux. <a href="#open">See how</a></span></p>
 
       <div class="cmd"><span class="p">$</span><code>npm install -g @d-beloved/safe-sweep</code><button class="copy" type="button" data-copy="npm install -g @d-beloved/safe-sweep">Copy</button></div>
       <div class="cmd"><span class="p">$</span><code>safe-sweep</code><button class="copy" type="button" data-copy="safe-sweep">Copy</button></div>
@@ -191,6 +217,25 @@
       <p class="shot-note">The page after a scan. Sample sizes.</p>
     </div>
   </div>
+
+  <section id="open">
+    <div class="open">
+      <div>
+        <h2>Open it like any other app</h2>
+        <p class="intro">Install once from the terminal. Then one button on the page puts Safe Sweep where you open everything else.</p>
+        <ul class="ways">
+          <li><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18M7 6.5h.01M10 6.5h.01"/></svg></span><div><h3>Mac app</h3><p><b>Create app</b> adds Safe Sweep to your Applications folder. Open it from Spotlight, Launchpad or the Dock.</p></div></li>
+          <li><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg></span><div><h3>Shortcuts</h3><p><b>Add to Shortcuts</b> makes a Safe Sweep shortcut you can pin to the menu bar. Turn on Allow Running Scripts in Shortcuts settings first.</p></div></li>
+          <li><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/></svg></span><div><h3>Linux menu entry</h3><p><b>Add to menu</b> puts Safe Sweep in your app launcher.</p></div></li>
+        </ul>
+        <p class="note">These need the installed version, because <code>npx</code> runs from a temporary folder.</p>
+      </div>
+      <figure class="panel-shot">
+        <div class="crop" role="img" aria-label="The Open without a terminal panel on the page, showing the Safe Sweep app installed in Applications and the shortcut added"></div>
+        <figcaption>The panel on the page, with the app and the shortcut added.</figcaption>
+      </figure>
+    </div>
+  </section>
 
   <section>
     <div class="local">
