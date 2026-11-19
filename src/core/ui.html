@@ -11,27 +11,28 @@
 <style>
   [hidden]{display:none !important}
   :root{
-    --bg:#F3F1EC; --card:#FFFFFF; --ink:#1B1A17; --soft:#5F5B52; --faint:#8F8A7E; --rule:#E2DDD2;
-    --accent:#1F5E4A; --accent-ink:#FFFFFF; --safe:#1F7A4D; --safe-bg:#E1F1E7;
-    --warn:#8A5A00; --warn-bg:#F6EBD3; --info:#4A5A78; --info-bg:#E6EAF2; --bad:#A3362E; --bad-bg:#F6E1DE;
-    --bar:#E7E2D7; --used:#2B2A26;
+    /* Ink colours: white paper, black ink, one teal. Red only for deleting and errors. */
+    --bg:oklch(97% 0.004 100); --card:oklch(99.5% 0.003 100); --ink:oklch(16% 0 0); --soft:oklch(40% 0 0); --faint:oklch(52% 0 0); --rule:oklch(89% 0.004 100);
+    --accent:oklch(50% 0.095 188); --accent-ink:oklch(99.5% 0.003 100); --safe:oklch(40% 0.08 188); --safe-bg:oklch(94.5% 0.03 188);
+    --warn:oklch(28% 0 0); --warn-bg:oklch(93.5% 0.006 100); --info:oklch(44% 0 0); --info-bg:transparent; --bad:oklch(50% 0.17 27); --bad-bg:oklch(95% 0.03 27); --bad-ink:oklch(99.5% 0.003 100);
+    --bar:oklch(93.5% 0.006 100); --used:oklch(78% 0.004 100);
     color-scheme:light;
   }
   /* Dark colours: follow the system unless the page is set to light, or always when set to dark. Keep both blocks in step. */
   @media (prefers-color-scheme: dark){
     :root:not([data-theme=light]){
-      --bg:#121311; --card:#1B1C1A; --ink:#ECEAE4; --soft:#B3AFA5; --faint:#7E7A70; --rule:#2C2D2A;
-      --accent:#5CC29B; --accent-ink:#0F1A15; --safe:#6FCF9B; --safe-bg:#1A2E23;
-      --warn:#E3B45C; --warn-bg:#33291A; --info:#9DB0D6; --info-bg:#1F2533; --bad:#E8857C; --bad-bg:#352120;
-      --bar:#2A2B28; --used:#D9D6CE;
+      --bg:oklch(17% 0.004 100); --card:oklch(20.5% 0.005 100); --ink:oklch(95% 0 0); --soft:oklch(80% 0 0); --faint:oklch(64% 0 0); --rule:oklch(31% 0.004 100);
+      --accent:oklch(74% 0.085 188); --accent-ink:oklch(17% 0.004 100); --safe:oklch(84% 0.07 188); --safe-bg:oklch(30% 0.045 190);
+      --warn:oklch(90% 0 0); --warn-bg:oklch(26% 0.006 100); --info:oklch(72% 0 0); --info-bg:transparent; --bad:oklch(70% 0.13 27); --bad-bg:oklch(27% 0.05 27); --bad-ink:oklch(17% 0.004 100);
+      --bar:oklch(26% 0.006 100); --used:oklch(44% 0.004 100);
       color-scheme:dark;
     }
   }
   :root[data-theme=dark]{
-    --bg:#121311; --card:#1B1C1A; --ink:#ECEAE4; --soft:#B3AFA5; --faint:#7E7A70; --rule:#2C2D2A;
-    --accent:#5CC29B; --accent-ink:#0F1A15; --safe:#6FCF9B; --safe-bg:#1A2E23;
-    --warn:#E3B45C; --warn-bg:#33291A; --info:#9DB0D6; --info-bg:#1F2533; --bad:#E8857C; --bad-bg:#352120;
-    --bar:#2A2B28; --used:#D9D6CE;
+    --bg:oklch(17% 0.004 100); --card:oklch(20.5% 0.005 100); --ink:oklch(95% 0 0); --soft:oklch(80% 0 0); --faint:oklch(64% 0 0); --rule:oklch(31% 0.004 100);
+    --accent:oklch(74% 0.085 188); --accent-ink:oklch(17% 0.004 100); --safe:oklch(84% 0.07 188); --safe-bg:oklch(30% 0.045 190);
+    --warn:oklch(90% 0 0); --warn-bg:oklch(26% 0.006 100); --info:oklch(72% 0 0); --info-bg:transparent; --bad:oklch(70% 0.13 27); --bad-bg:oklch(27% 0.05 27); --bad-ink:oklch(17% 0.004 100);
+    --bar:oklch(26% 0.006 100); --used:oklch(44% 0.004 100);
     color-scheme:dark;
   }
   *{box-sizing:border-box}
@@ -44,7 +45,7 @@
   button:hover:not(:disabled){border-color:var(--faint)}
   button:disabled{opacity:.5;cursor:default}
   button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);padding:10px 20px}
-  button.danger{background:var(--bad);color:#fff;border-color:var(--bad)}
+  button.danger{background:var(--bad);color:var(--bad-ink);border-color:var(--bad)}
   button.link{border:none;background:none;color:var(--soft);padding:2px 6px;font-weight:500;font-size:13px;text-decoration:underline}
   button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
@@ -58,7 +59,7 @@
   .tot{flex:1;min-width:150px;border-radius:10px;padding:10px 12px}
   .tot .n{font-weight:700;font-size:20px;font-variant-numeric:tabular-nums}
   .tot .l{font-size:12px}
-  .tot.safe{background:var(--safe-bg);color:var(--safe)} .tot.reinstall{background:var(--warn-bg);color:var(--warn)} .tot.review{background:var(--info-bg);color:var(--info)}
+  .tot.safe{background:var(--safe-bg);color:var(--safe)} .tot.reinstall{background:var(--warn-bg);color:var(--warn)} .tot.review{background:var(--info-bg);color:var(--info);box-shadow:inset 0 0 0 1px var(--rule)}
 
   section{margin-top:32px}
   .shead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:8px;flex-wrap:wrap}
@@ -110,23 +111,32 @@
   .stopped{margin-top:24px;background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:24px;text-align:center}
   .stopped b{display:block;font-size:18px;margin-bottom:4px}
   .stopped span{color:var(--soft);font-size:14px}
-  .warnline{color:var(--warn)}
+  .warnline{color:var(--warn);font-weight:600}
   .panels{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
   .panel{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
   .panel h2{margin:0;font-size:14px;letter-spacing:.02em}
   .panel .status{font-size:13px;color:var(--soft)} .panel .status b{color:var(--ink)}
-  .panel .warn{font-size:12.5px;color:var(--warn)}
+  .panel .warn{font-size:12.5px;color:var(--warn);font-weight:600}
   .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
   select{font:inherit;font-size:14px;border:1px solid var(--rule);border-radius:8px;background:var(--surface,var(--card));color:var(--ink);padding:6px 8px}
   .seg{display:inline-flex;border:1px solid var(--rule);border-radius:8px;overflow:hidden}
   .seg button{border:none;border-radius:0;padding:6px 12px;font-weight:500;background:transparent}
   .seg button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink)}
-  .lrow{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+  .lrow{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .lrow > div{min-width:0} .lrow button{flex:none}
   .lrow .lt{font-size:14px;font-weight:600} .lrow .ls{font-size:12.5px;color:var(--soft)}
   .ok{color:var(--safe)}
   .stale{margin-top:16px;background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:10px 14px;font-size:13px}
   button.small{padding:6px 12px;font-size:13px}
   @media (max-width:700px){.panels{grid-template-columns:1fr}}
+  /* On a phone the selection bar is one row: the size over the count, then Clear and Clean selected. */
+  @media (max-width:560px){
+    .foot .in{flex-wrap:nowrap}
+    .foot .sel{min-width:0;line-height:1.25}
+    .foot .sel b{display:block}
+    .foot .acts{display:flex;gap:8px;flex:none}
+    .foot .long{display:none}
+  }
   @media (max-width:560px){.row-item{grid-template-columns:24px minmax(0,1fr)}.right{grid-column:2;align-items:center;flex-direction:row;flex-wrap:wrap}.pill{white-space:normal}}
 </style>
 </head>
@@ -196,9 +206,9 @@
 
 <div class="foot">
   <div class="in">
-    <div class="sel"><b id="selGB">0 GB</b> selected · <span id="selN">0</span> items</div>
-    <div>
-      <button id="clearSel" disabled>Clear selection</button>
+    <div class="sel"><b id="selGB" hidden></b><span id="selText">Nothing selected</span></div>
+    <div class="acts">
+      <button id="clearSel" aria-label="Clear selection" disabled>Clear<span class="long"> selection</span></button>
       <button class="primary" id="cleanBtn" disabled>Clean selected</button>
     </div>
   </div>
@@ -291,8 +301,10 @@ function render() {
 
 function updateFoot() {
   const bytes = data ? data.items.filter((i) => selected.has(i.id)).reduce((a, i) => a + (i.bytes || 0), 0) : 0;
-  $('selGB').textContent = fmt(bytes);
-  $('selN').textContent = selected.size;
+  const n = selected.size;
+  $('selGB').hidden = !n;
+  $('selGB').textContent = n ? fmt(bytes) : '';
+  $('selText').textContent = n ? ` selected · ${n} ${n === 1 ? 'item' : 'items'}` : 'Nothing selected';
   $('cleanBtn').disabled = !selected.size || isStale();
   $('clearSel').disabled = !selected.size;
   // Each list's "Select all" box: ticked when every item that can be cleaned is, dashed when some are.

@@ -14,7 +14,8 @@
   ],
   "scripts": {
     "start": "node bin/safe-sweep.js",
-    "test": "node --test"
+    "test": "node --test",
+    "site": "python3 -m http.server 4780 --bind 127.0.0.1 --directory site"
   },
   "engines": {
     "node": ">=20"

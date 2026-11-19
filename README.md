@@ -7,8 +7,8 @@ safe-sweep scans for caches, build leftovers and dormant `node_modules`, sorts t
 Website: [safesweep.morayodeji.dev](https://safesweep.morayodeji.dev/)
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/d-beloved/safe-sweep/main/docs/screenshot-dark.png?v=3">
-  <img alt="safe-sweep after a scan" src="https://raw.githubusercontent.com/d-beloved/safe-sweep/main/docs/screenshot.png?v=3">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/d-beloved/safe-sweep/main/docs/screenshot-dark.png?v=4">
+  <img alt="safe-sweep after a scan" src="https://raw.githubusercontent.com/d-beloved/safe-sweep/main/docs/screenshot.png?v=4">
 </picture>
 <sub>Screenshot uses sample sizes. The page follows your system’s light or dark setting.</sub>
 

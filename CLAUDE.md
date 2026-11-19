@@ -7,6 +7,7 @@ A local tool that scans a developer's machine for disk space that can be freed s
 - `npm test`: runs `node --test` (guard, Linux platform, symlinked-home and CLI tests). Run it after every change.
 - `npm start` or `safe-sweep`: starts the page at http://127.0.0.1:4777.
 - `safe-sweep scan`: prints the scan without deleting anything. Safe to run while developing.
+- `npm run site`: serves the public site at http://localhost:4780 from `site/`, a checkout of the `gh-pages` branch (`git worktree add site gh-pages`; main ignores it). Commit and push from inside `site/` to publish the site.
 - `SAFE_SWEEP_PLATFORM=darwin HOME=<temp dir> node bin/safe-sweep.js ...`: run against a throwaway home. Use this for any manual test that cleans. Never clean against the real home while developing.
 
 ## Layout
