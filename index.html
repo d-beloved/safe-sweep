@@ -14,403 +14,274 @@
 <meta property="og:image" content="https://safesweep.morayodeji.dev/social-preview.png?v=3">
 <meta property="og:url" content="https://safesweep.morayodeji.dev/">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2300746d'/%3E%3Cpath d='M9 17l5 5 9-11' stroke='%23fefdfb' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2300746d'/%3E%3Cpath d='M9 17l5 5 9-11' stroke='white' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <style>
-  /* Hallmark · shape: Workbench (draw 9bb984) · genre: editorial · theme: Ink (kept from the app) · redesign: full
-   * hero: Banner, the headline over the lede and the install commands · nav: edge-aligned, the wordmark left, links and the theme switch right · footer: mast, the wordmark set large over the licence and the links · imagery: captures of the real app from a seeded demo home, light and dark · signature: the app's own screen after a scan, full width under the install commands · ink: paper
-   * axes: light/grotesk-sans/chromatic-teal · posture: restrained · modes: light+dark · contrast: pass · fold: pass · v2.0.0 */
-  /* Hallmark · pre-emit critique: P4 H5 E4 S4 R5 V4 · weakest: P, the three lists are words only, the app's own list capture carries them in How it works */
-  /* Hallmark · waive 22 · ink and greys at zero chroma · the page is printed in plain black ink, like the app it explains */
-  /* Hallmark · draw swap: no closing action band, because a redesign adds no content; the install commands stay in the hero */
-  /* Hallmark · reworded "unlocks" (19), the platforms line and the footer dots (63); straight apostrophes made curly (F1) */
-  /* Fonts: system stacks, not the theme's web fonts. The tool makes no network calls, and this page makes no third-party requests either. */
-
   :root{
+    /* Ink colours: white paper, black ink, one teal. */
+    --bg:oklch(97% 0.004 100); --card:oklch(99.5% 0.003 100); --ink:oklch(16% 0 0); --soft:oklch(40% 0 0); --faint:oklch(52% 0 0); --rule:oklch(89% 0.004 100);
+    --accent:oklch(50% 0.095 188); --accent-ink:oklch(99.5% 0.003 100); --safe:oklch(40% 0.08 188); --safe-bg:oklch(94.5% 0.03 188);
+    --warn:oklch(28% 0 0); --warn-bg:oklch(93.5% 0.006 100); --info:oklch(44% 0 0); --info-bg:transparent;
+    --code-bg:oklch(16% 0 0); --code-ink:oklch(95% 0 0); --code-faint:oklch(62% 0 0); --code-line:oklch(32% 0 0); --code-line-hover:oklch(50% 0 0); --code-hover:oklch(100% 0 0);
     color-scheme:light;
-    --space-3xs:2px; --space-2xs:4px; --space-xs:8px; --space-sm:12px; --space-md:16px; --space-lg:24px; --space-xl:40px; --space-2xl:64px; --space-3xl:96px; --space-4xl:144px;
-    --text-xs:0.8125rem; --text-sm:0.875rem; --text-md:1rem; --text-lg:1.25rem; --text-xl:1.5625rem; --text-2xl:1.953rem; --text-3xl:2.441rem;
-    --text-display:clamp(2.75rem, 5vw + 1rem, 5.25rem); --text-display-s:clamp(2.25rem, 4vw + 0.5rem, 3.75rem); --text-mast:clamp(3.5rem, 13vw, 11rem);
-    --text-section:clamp(2rem, 2.5vw + 1rem, 3.25rem); --text-title:clamp(1.25rem, 0.75vw + 0.875rem, 1.625rem); --text-lead:clamp(1.125rem, 0.35vw + 1rem, 1.3125rem);
-    --ease-out:cubic-bezier(0.16, 1, 0.3, 1); --dur-micro:120ms; --dur-short:220ms;
-    --container:1440px; --gutter:64px; --gap-columns:32px; --section-gap-s:120px; --section-gap:144px;
-    --z-raised:10;
-    --color-paper:oklch(99.5% 0.003 100); --color-paper-2:oklch(97% 0.004 100); --color-paper-3:oklch(94% 0.006 100);
-    --color-ink:oklch(16% 0 0); --color-ink-2:oklch(28% 0 0); --color-muted:oklch(44% 0 0);
-    --color-rule:oklch(89% 0.004 100); --color-rule-2:oklch(93.5% 0.003 100);
-    --color-accent:oklch(50% 0.095 188); --color-accent-ink:oklch(99.5% 0.003 100); --color-accent-soft:oklch(93% 0.05 190); --color-accent-soft-ink:oklch(27% 0.045 190);
-    --color-focus:oklch(50% 0.095 188);
-    --font-display:ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
-    --font-body:ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
-    --font-mono:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    --radius-card:12px; --radius-control:10px; --radius-small:6px; --radius-pill:999px; --rule-hair:1px;
-    --tracking-display:-0.035em; --display-weight:700;
   }
-  /* Dark colours: follow the system unless the page is set to light, or always when set to dark. Keep both blocks in step. */
   @media (prefers-color-scheme: dark){
     :root:not([data-theme=light]){
-      --color-paper:oklch(17% 0.004 100); --color-paper-2:oklch(20.5% 0.005 100); --color-paper-3:oklch(24% 0.006 100);
-      --color-ink:oklch(95% 0 0); --color-ink-2:oklch(86% 0 0); --color-muted:oklch(70% 0 0);
-      --color-rule:oklch(33% 0.004 100); --color-rule-2:oklch(27% 0.004 100);
-      --color-accent:oklch(74% 0.085 188); --color-accent-ink:oklch(17% 0.004 100); --color-accent-soft:oklch(31% 0.045 190); --color-accent-soft-ink:oklch(91% 0.04 190);
-      --color-focus:oklch(74% 0.085 188);
+      --bg:oklch(17% 0.004 100); --card:oklch(20.5% 0.005 100); --ink:oklch(95% 0 0); --soft:oklch(80% 0 0); --faint:oklch(64% 0 0); --rule:oklch(31% 0.004 100);
+      --accent:oklch(74% 0.085 188); --accent-ink:oklch(17% 0.004 100); --safe:oklch(84% 0.07 188); --safe-bg:oklch(30% 0.045 190);
+      --warn:oklch(90% 0 0); --warn-bg:oklch(26% 0.006 100); --info:oklch(72% 0 0); --info-bg:transparent;
+      --code-bg:oklch(12.5% 0.003 100); --code-ink:oklch(95% 0 0); --code-faint:oklch(62% 0 0); --code-line:oklch(32% 0 0); --code-line-hover:oklch(50% 0 0); --code-hover:oklch(100% 0 0);
       color-scheme:dark;
     }
   }
   :root[data-theme=dark]{
-    --color-paper:oklch(17% 0.004 100); --color-paper-2:oklch(20.5% 0.005 100); --color-paper-3:oklch(24% 0.006 100);
-    --color-ink:oklch(95% 0 0); --color-ink-2:oklch(86% 0 0); --color-muted:oklch(70% 0 0);
-    --color-rule:oklch(33% 0.004 100); --color-rule-2:oklch(27% 0.004 100);
-    --color-accent:oklch(74% 0.085 188); --color-accent-ink:oklch(17% 0.004 100); --color-accent-soft:oklch(31% 0.045 190); --color-accent-soft-ink:oklch(91% 0.04 190);
-    --color-focus:oklch(74% 0.085 188);
+    --bg:oklch(17% 0.004 100); --card:oklch(20.5% 0.005 100); --ink:oklch(95% 0 0); --soft:oklch(80% 0 0); --faint:oklch(64% 0 0); --rule:oklch(31% 0.004 100);
+    --accent:oklch(74% 0.085 188); --accent-ink:oklch(17% 0.004 100); --safe:oklch(84% 0.07 188); --safe-bg:oklch(30% 0.045 190);
+    --warn:oklch(90% 0 0); --warn-bg:oklch(26% 0.006 100); --info:oklch(72% 0 0); --info-bg:transparent;
+    --code-bg:oklch(12.5% 0.003 100); --code-ink:oklch(95% 0 0); --code-faint:oklch(62% 0 0); --code-line:oklch(32% 0 0); --code-line-hover:oklch(50% 0 0); --code-hover:oklch(100% 0 0);
     color-scheme:dark;
   }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent)}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+  code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.9em}
 
-  /* Base */
-  *,*::before,*::after{box-sizing:border-box}
-  html,body{overflow-x:clip}
-  html{-webkit-text-size-adjust:100%;scroll-padding-top:var(--space-xl);scrollbar-color:var(--color-muted) var(--color-paper)}
-  body{margin:0;background:var(--color-paper);color:var(--color-ink);font-family:var(--font-body);font-size:var(--text-md);line-height:1.55;-webkit-font-smoothing:antialiased}
-  ::selection{background:var(--color-accent-soft);color:var(--color-accent-soft-ink)}
-  :focus-visible{outline:2px solid var(--color-focus);outline-offset:2px}
-  a{color:inherit;text-decoration-thickness:1px;text-underline-offset:0.16em}
-  h1,h2,h3{margin:0;font-family:var(--font-display);font-weight:var(--display-weight);letter-spacing:var(--tracking-display);line-height:1.05;overflow-wrap:break-word;min-width:0;text-wrap:balance}
-  h2{font-size:var(--text-section);max-width:20ch}
-  h3{font-size:var(--text-title);line-height:1.2;letter-spacing:-0.02em}
-  p{margin:0;text-wrap:pretty}
-  ul,ol{margin:0;padding:0;list-style:none}
-  img{display:block;max-width:100%;height:auto}
-  svg{display:block}
-  code,.mono{font-family:var(--font-mono);font-size:0.92em}
-  .container{width:100%;max-width:var(--container);margin-inline:auto;padding-inline:var(--gutter)}
-  .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--gap-columns)}
-  .lead{font-size:var(--text-lead);line-height:1.45;color:var(--color-ink-2);max-width:52ch}
-
-  /* Links and buttons: default, hover, focus-visible, active, disabled. Colour, background and border only. */
-  .link{color:var(--color-muted);text-decoration:none;transition-property:color;transition-duration:var(--dur-micro)}
-  @media (hover:hover){.link:hover{color:var(--color-ink);text-decoration:underline}}
-  .link:active{color:var(--color-ink-2)}
-  .link:focus-visible{color:var(--color-ink)}
-
-  .btn{display:inline-flex;align-items:center;min-height:44px;padding:0 var(--space-lg);border-radius:var(--radius-control);border:var(--rule-hair) solid var(--color-rule);background:var(--color-paper-2);color:var(--color-ink);font-weight:600;font-size:var(--text-md);text-decoration:none;cursor:pointer;transition-property:background-color,border-color,color;transition-duration:var(--dur-micro)}
-  @media (hover:hover){.btn:hover{background:var(--color-paper-3);border-color:var(--color-muted)}}
-  .btn:active{background:var(--color-rule)}
-  .btn.primary{background:var(--color-ink);border-color:var(--color-ink);color:var(--color-paper)}
-  @media (hover:hover){.btn.primary:hover{background:var(--color-ink-2);border-color:var(--color-ink-2)}}
-  .btn.primary:active{background:var(--color-muted);border-color:var(--color-muted)}
-  .btn[aria-disabled=true]{opacity:.5;cursor:not-allowed;border-style:dashed}
-
-  /* Top bar */
-  .top{display:flex;justify-content:space-between;align-items:center;gap:var(--space-md);padding-block:var(--space-lg)}
-  .brand{display:flex;align-items:center;gap:var(--space-sm);font-weight:700;font-size:var(--text-lg);letter-spacing:-0.02em;color:var(--color-ink);text-decoration:none;white-space:nowrap}
-  @media (hover:hover){.brand:hover{color:var(--color-ink-2)}}
-  .brand:active{color:var(--color-muted)}
-  .right{display:flex;align-items:center;gap:var(--space-lg)}
-  .nav{display:flex;gap:var(--space-lg);font-size:var(--text-sm)}
-  .theme{display:inline-flex;border:var(--rule-hair) solid var(--color-rule);border-radius:var(--radius-control);overflow:hidden;background:var(--color-paper)}
-  .theme button{display:grid;place-items:center;width:36px;height:36px;border:none;background:transparent;color:var(--color-muted);cursor:pointer;transition-property:background-color,color;transition-duration:var(--dur-micro)}
-  .theme button + button{border-left:var(--rule-hair) solid var(--color-rule)}
-  @media (hover:hover){.theme button:hover{color:var(--color-ink);background:var(--color-paper-2)}}
-  .theme button:active{background:var(--color-paper-3)}
-  .theme button[aria-pressed=true]{color:var(--color-ink);background:var(--color-paper-2);box-shadow:inset 0 -2px 0 var(--color-ink)}
-  .theme button:focus-visible{outline-offset:-2px}
-  .theme button:disabled{opacity:.5;cursor:not-allowed;text-decoration:line-through}
+  /* top bar */
+  .top{display:flex;justify-content:space-between;align-items:center;padding:20px 0;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;color:var(--ink);text-decoration:none;letter-spacing:-.01em;white-space:nowrap}
+  .brand svg{flex:none}
+  .nav{display:flex;gap:18px;font-size:14px}
+  .nav a{color:var(--soft);text-decoration:none}
+  .nav a:hover{color:var(--ink)}
+  .right{display:flex;align-items:center;gap:18px}
+  .theme{display:inline-flex;border:1px solid var(--rule);border-radius:8px;overflow:hidden;background:var(--card)}
+  .theme button{border:none;background:transparent;color:var(--soft);padding:8px;line-height:0;cursor:pointer}
+  .theme button:hover{color:var(--ink)}
+  .theme button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink)}
+  .theme button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
   .theme svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
-  /* Hero */
-  .hero{padding-block:var(--space-xl) var(--space-xl)}
-  .hero h1{font-size:var(--text-display);max-width:none;grid-column:1 / -1}
-  .hero h1 span{display:block}
-  .hero .lead{grid-column:1 / 7;margin-top:var(--space-xl)}
-  .install{grid-column:7 / -1;grid-row:2 / span 2;margin-top:var(--space-xl);align-self:start}
-  .facts{grid-column:1 / 7;display:flex;flex-wrap:wrap;gap:var(--space-xs);margin-top:var(--space-lg);font-size:var(--text-sm);color:var(--color-ink-2)}
-  .facts li{border:var(--rule-hair) solid var(--color-rule);border-radius:var(--radius-pill);padding:var(--space-3xs) var(--space-sm)}
+  /* hero */
+  .hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:48px;align-items:center;padding:48px 0 64px}
+  h1{font:700 clamp(34px,5vw,52px)/1.05 -apple-system,"SF Pro Display",system-ui,sans-serif;letter-spacing:-.03em;margin:0 0 18px}
+  .lede{font-size:18px;color:var(--soft);margin:0 0 28px;max-width:34em}
+  .platforms{font-size:13px;color:var(--faint);margin-top:14px}
+  .platforms span{white-space:nowrap}
 
-  .cmd{display:flex;align-items:center;gap:var(--space-sm);background:var(--color-paper-2);color:var(--color-ink);border:var(--rule-hair) solid var(--color-rule);border-radius:var(--radius-control);padding:var(--space-2xs) var(--space-2xs) var(--space-2xs) var(--space-md);font-family:var(--font-mono);font-size:var(--text-sm);line-height:1.4}
-  .cmd + .cmd{margin-top:var(--space-xs)}
-  .cmd .p{color:var(--color-muted);user-select:none}
+  .cmd{display:flex;align-items:center;gap:10px;background:var(--code-bg);color:var(--code-ink);border:1px solid var(--code-line);border-radius:10px;padding:12px 12px 12px 16px;font:14px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;max-width:100%}
+  .cmd + .cmd{margin-top:8px}
+  .cmd .p{color:var(--code-faint);user-select:none}
   .cmd code{flex:1;min-width:0;overflow-x:auto;white-space:nowrap;font-size:inherit}
-  .copy{flex:none;min-height:44px;padding:0 var(--space-sm);font-family:var(--font-body);font-size:var(--text-xs);font-weight:600;background:var(--color-paper);color:var(--color-ink-2);border:var(--rule-hair) solid var(--color-rule);border-radius:var(--radius-small);cursor:pointer;transition-property:background-color,border-color,color;transition-duration:var(--dur-micro)}
-  @media (hover:hover){.copy:hover{color:var(--color-ink);border-color:var(--color-muted)}}
-  .copy:active{background:var(--color-paper-3)}
-  .copy:disabled{opacity:.5;cursor:not-allowed;border-style:dashed}
-  .copy[data-state=done]{color:var(--color-accent);border-color:var(--color-accent)}
-  .or{font-size:var(--text-sm);color:var(--color-muted);margin:var(--space-md) 0 var(--space-xs)}
+  .copy{flex:none;font:600 12px/1 -apple-system,system-ui,sans-serif;background:transparent;color:var(--code-faint);border:1px solid var(--code-line);border-radius:6px;padding:7px 10px;cursor:pointer}
+  .copy:hover{color:var(--code-hover);border-color:var(--code-line-hover)}
+  .copy:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .or{font-size:13px;color:var(--faint);margin:10px 0 8px}
 
-  /* Captures */
-  .frame{border:var(--rule-hair) solid var(--color-rule);border-radius:var(--radius-card);overflow:hidden;background:var(--color-paper)}
-  .frame img{width:100%}
-  figure{margin:0}
-  figcaption{font-size:var(--text-sm);color:var(--color-muted);margin-top:var(--space-sm)}
-  .shot{grid-column:1 / -1;margin-top:var(--space-xl)}
-  .shot .frame{aspect-ratio:3.6 / 1}
-  .shot img{height:100%;object-fit:cover;object-position:top}
-  .band{margin-top:var(--space-3xl)}
+  .actions{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+  .btn{display:inline-block;font-weight:600;font-size:15px;border-radius:8px;padding:10px 18px;text-decoration:none;border:1px solid var(--rule);background:var(--card);color:var(--ink)}
+  .btn:hover{border-color:var(--faint)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 
-  /* Sections */
-  .sec{padding-top:var(--section-gap)}
-  .sec-head{align-items:end;margin-bottom:var(--space-2xl)}
-  .sec-head h2{grid-column:1 / 7}
-  .sec-head p{grid-column:8 / -1;color:var(--color-ink-2);font-size:var(--text-lead);line-height:1.45}
+  .shot{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--rule);background:var(--card);box-shadow:0 1px 2px rgba(0,0,0,.04),0 12px 40px -12px rgba(0,0,0,.18);max-height:560px}
+  .shot img{display:block;width:100%;height:auto}
+  .shot::after{content:"";position:absolute;left:0;right:0;bottom:0;height:90px;background:linear-gradient(to bottom,transparent,var(--card))}
+  .shot-note{font-size:12px;color:var(--faint);margin-top:10px;text-align:center}
 
-  .band{color:var(--color-ink);background:var(--color-paper-2);border-block:var(--rule-hair) solid var(--color-rule);padding-block:var(--section-gap-s)}
-  .band .mark{grid-column:1 / 11;display:flex;flex-direction:column;gap:var(--space-xl)}
-  .band h2{font-size:var(--text-display-s);max-width:18ch}
-  .band svg{color:var(--color-accent);width:var(--space-2xl);height:var(--space-2xl)}
-  .band p{grid-column:7 / -1;margin-top:var(--space-2xl)}
-  .band code{color:var(--color-ink)}
+  /* sections */
+  section{padding:56px 0;border-top:1px solid var(--rule)}
+  h2{font-size:26px;letter-spacing:-.02em;margin:0 0 8px;line-height:1.2}
+  .intro{color:var(--soft);margin:0 0 28px;max-width:40em}
 
-  .steps{counter-reset:s}
-  .steps > li{counter-increment:s;padding-block:var(--space-xl);border-top:var(--rule-hair) solid var(--color-ink);align-items:start}
-  .steps > li + li{border-top-color:var(--color-rule)}
-  .steps .text{grid-column:1 / 5;display:flex;flex-direction:column;gap:var(--space-sm)}
-  .steps .text::before{content:counter(s);font-family:var(--font-display);font-size:var(--text-3xl);font-weight:700;line-height:1;color:var(--color-muted);font-variant-numeric:tabular-nums;margin-bottom:var(--space-xs)}
-  .steps .text p{color:var(--color-ink-2);max-width:36ch}
-  .steps figure{grid-column:6 / -1;background:var(--color-paper-2);border-radius:var(--radius-card);padding:var(--space-xl)}
-  .steps figure img{margin-inline:auto}
-  .steps .narrow img{max-width:min(100%, 576px)}
+  .steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;counter-reset:s;padding:0;margin:0;list-style:none}
+  .steps li{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:20px}
+  .steps li::before{counter-increment:s;content:counter(s);display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:14px;margin-bottom:12px}
+  .steps b{display:block;margin-bottom:4px}
+  .steps p{margin:0;color:var(--soft);font-size:15px}
 
-  .tiers > li{padding-block:var(--space-lg);border-top:var(--rule-hair) solid var(--color-rule)}
-  .tiers > li:first-child{border-top-color:var(--color-ink)}
-  .tiers h3{grid-column:1 / 5}
-  .tiers p{grid-column:5 / 9;color:var(--color-ink-2)}
-  .tiers .ex{grid-column:9 / -1;color:var(--color-muted);font-size:var(--text-sm)}
+  .lists{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+  .list{border-radius:12px;padding:20px}
+  .list h3{margin:0 0 6px;font-size:17px}
+  .list p{margin:0;font-size:14.5px}
+  .list .ex{margin-top:10px;font-size:13.5px;opacity:.85}
+  .list.safe{background:var(--safe-bg);color:var(--safe)}
+  .list.reinstall{background:var(--warn-bg);color:var(--warn)}
+  .list.review{background:var(--info-bg);color:var(--info);box-shadow:inset 0 0 0 1px var(--rule)}
 
-  .safety .sec-head{grid-column:1 / 5;display:flex;flex-direction:column;gap:var(--space-md);margin:0;align-self:start;position:sticky;top:var(--space-xl)}
-  .safety .sec-head p{font-size:var(--text-md)}
-  .rules{grid-column:5 / -1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:var(--gap-columns)}
-  .rules li{padding-block:var(--space-lg);border-top:var(--rule-hair) solid var(--color-rule);display:flex;flex-direction:column;gap:var(--space-2xs)}
-  .rules li:nth-child(-n+2){border-top-color:var(--color-ink)}
-  .rules b{font-weight:600}
-  .rules span{color:var(--color-ink-2)}
-  .rules a{color:var(--color-ink)}
-  @media (hover:hover){.rules a:hover{color:var(--color-accent)}}
-  .rules a:active{color:var(--color-muted)}
+  .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 32px;padding:0;margin:0;list-style:none}
+  .grid2 li{padding:14px 0;border-bottom:1px solid var(--rule)}
+  .grid2 b{display:block;margin-bottom:2px}
+  .grid2 span{color:var(--soft);font-size:15px}
+  .grid2 code{white-space:nowrap}
 
-  .tbl{overflow-x:auto;grid-column:1 / 10}
-  table{width:100%;border-collapse:collapse}
-  th,td{text-align:left;padding:var(--space-md) var(--space-md) var(--space-md) 0;border-bottom:var(--rule-hair) solid var(--color-rule);vertical-align:top}
-  th{font-size:var(--text-sm);color:var(--color-muted);font-weight:600;border-bottom-color:var(--color-ink)}
-  td.mono{white-space:nowrap;font-weight:600}
-  .actions{grid-column:1 / -1;display:flex;gap:var(--space-sm);flex-wrap:wrap;margin-top:var(--space-xl)}
+  .local{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:24px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:start}
+  .local svg{color:var(--accent)}
+  .local h3{margin:0 0 6px;font-size:18px}
+  .local p{margin:0;color:var(--soft)}
 
-  /* Footer: the wordmark set large over the licence and the links */
-  .mast{margin-top:var(--section-gap);border-top:var(--rule-hair) solid var(--color-rule);padding-block:var(--space-2xl) var(--space-xl)}
-  .mast .word{font-family:var(--font-display);font-weight:700;font-size:var(--text-mast);letter-spacing:-0.05em;line-height:0.9;color:var(--color-ink)}
-  .mast .row{display:flex;justify-content:space-between;align-items:center;gap:var(--space-md);flex-wrap:wrap;margin-top:var(--space-xl);font-size:var(--text-sm);color:var(--color-muted)}
-  .mast ul{display:flex;gap:var(--space-lg)}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  th,td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-size:13px;color:var(--faint);font-weight:600}
+  td:first-child{font-weight:600}
+  .tbl{overflow-x:auto}
 
-  @media (max-width:60rem){
-    :root{--gutter:24px;--section-gap-s:80px;--section-gap:96px}
-    .hero .lead,.install,.facts,.sec-head h2,.sec-head p,.band .mark,.band p,.steps .text,.steps figure,.tiers h3,.tiers p,.tiers .ex,.safety .sec-head,.rules,.tbl{grid-column:1 / -1}
-    .install{grid-row:auto;margin-top:var(--space-lg)}
-    .shot .frame{aspect-ratio:auto}
-    .shot img{height:auto}
-    .sec-head p,.band p,.steps figure,.tiers p,.tiers .ex{margin-top:var(--space-md)}
-    .tiers p{margin-top:var(--space-xs)}
-    .safety .sec-head{position:static;margin-bottom:var(--space-xl)}
-    .steps figure{padding:var(--space-lg)}
+  footer{border-top:1px solid var(--rule);padding:28px 0 40px;color:var(--faint);font-size:14px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  footer a{color:var(--soft)}
+
+  @media (max-width:860px){
+    .hero{grid-template-columns:minmax(0,1fr);gap:36px;padding:28px 0 48px}
+    .steps,.lists{grid-template-columns:minmax(0,1fr)}
+    .grid2{grid-template-columns:minmax(0,1fr);gap:0}
   }
-  @media (max-width:40rem){
-    :root{--gutter:16px;--section-gap-s:56px;--section-gap:72px;--gap-columns:16px}
+  @media (max-width:520px){
+    .wrap{padding:0 16px}
     .nav a.hide-sm{display:none}
-    .right{gap:var(--space-md)}
-    .rules{grid-template-columns:minmax(0,1fr)}
-    .cmd code{white-space:normal;overflow-wrap:anywhere}
-    .rules li:nth-child(2){border-top-color:var(--color-rule)}
-    .steps figure{padding:var(--space-md)}
+    .right{gap:14px}
   }
-  @media (max-width:25rem){
+  @media (max-width:400px){
     .nav a.hide-xs{display:none}
-  }
-  @media (prefers-reduced-motion: reduce){
-    *,*::before,*::after{transition-duration:0.01ms !important;animation-duration:0.01ms !important;scroll-behavior:auto !important}
+    .local{grid-template-columns:1fr}
+    section{padding:44px 0}
   }
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<header class="top container">
-  <a class="brand" href="./">
-    <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--color-accent)"/><path d="M9 17l5 5 9-11" stroke="var(--color-accent-ink)" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    safe-sweep
-  </a>
-  <div class="right">
-    <nav class="nav" aria-label="Main">
-      <a class="link hide-sm" href="#how">How it works</a>
-      <a class="link hide-sm" href="#safety">Safety</a>
-      <a class="link" href="https://github.com/d-beloved/safe-sweep">GitHub</a>
-      <a class="link hide-xs" href="https://www.npmjs.com/package/@d-beloved/safe-sweep">npm</a>
-    </nav>
-    <div class="theme" role="group" aria-label="Theme">
-      <button type="button" data-theme="auto" title="Match the system setting" aria-label="Match the system setting"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button>
-      <button type="button" data-theme="light" title="Light" aria-label="Light"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-      <button type="button" data-theme="dark" title="Dark" aria-label="Dark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+  <header class="top">
+    <a class="brand" href="./">
+      <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--accent)"/><path d="M9 17l5 5 9-11" stroke="var(--accent-ink)" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      safe-sweep
+    </a>
+    <div class="right">
+      <nav class="nav">
+        <a class="hide-sm" href="#how">How it works</a>
+        <a class="hide-sm" href="#safety">Safety</a>
+        <a href="https://github.com/d-beloved/safe-sweep">GitHub</a>
+        <a class="hide-xs" href="https://www.npmjs.com/package/@d-beloved/safe-sweep">npm</a>
+      </nav>
+      <div class="theme" role="group" aria-label="Theme">
+        <button type="button" data-theme="auto" title="Match the system setting" aria-label="Match the system setting"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button>
+        <button type="button" data-theme="light" title="Light" aria-label="Light"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+        <button type="button" data-theme="dark" title="Dark" aria-label="Dark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+      </div>
     </div>
-  </div>
-</header>
+  </header>
 
-<main>
-  <section class="hero container grid">
-    <h1><span>Free up disk space.</span> <span>Delete only what you tick.</span></h1>
-    <p class="lead">safe-sweep finds caches, build leftovers and old <code>node_modules</code> on your machine. It sorts them by how safe they are to remove and shows real sizes. Nothing is deleted until you tick it and confirm.</p>
+  <div class="hero">
+    <div>
+      <h1>Free up disk space. Delete only what you tick.</h1>
+      <p class="lede">safe-sweep finds caches, build leftovers and old <code>node_modules</code> on your machine. It sorts them by how safe they are to remove and shows real sizes. Nothing is deleted until you tick it and confirm.</p>
 
-    <div class="install">
       <div class="cmd"><span class="p">$</span><code>npm install -g @d-beloved/safe-sweep</code><button class="copy" type="button" data-copy="npm install -g @d-beloved/safe-sweep">Copy</button></div>
       <div class="cmd"><span class="p">$</span><code>safe-sweep</code><button class="copy" type="button" data-copy="safe-sweep">Copy</button></div>
       <p class="or">Or try it once without installing:</p>
       <div class="cmd"><span class="p">$</span><code>npx @d-beloved/safe-sweep</code><button class="copy" type="button" data-copy="npx @d-beloved/safe-sweep">Copy</button></div>
+
+      <p class="platforms"><span>macOS and Linux ·</span> <span>Node 20 or newer ·</span> <span>No dependencies ·</span> <span>MIT</span></p>
     </div>
 
-    <ul class="facts" aria-label="Requirements">
-      <li>macOS and Linux</li>
-      <li>Node 20 or newer</li>
-      <li>No dependencies</li>
-      <li>MIT</li>
-    </ul>
-
-  <figure class="shot">
-    <div class="frame">
-      <picture>
-        <source id="shotDark" data-dark media="(prefers-color-scheme: dark)" srcset="screenshot-dark.png">
-        <img src="screenshot.png" alt="The safe-sweep page after a scan, showing free space, three totals and a list of caches with sizes" width="2400" height="1764">
-      </picture>
-    </div>
-    <figcaption>The page after a scan. Sample sizes.</figcaption>
-  </figure>
-  </section>
-
-  <section class="band" aria-labelledby="local">
-    <div class="container grid">
-      <div class="mark">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
-        <h2 id="local">It runs on your machine, not in the cloud</h2>
+    <div>
+      <div class="shot">
+        <picture>
+          <source id="shotDark" media="(prefers-color-scheme: dark)" srcset="screenshot-dark.png">
+          <img src="screenshot.png" alt="The safe-sweep page after a scan, showing free space, three totals and a list of caches with sizes" width="1880" height="2480">
+        </picture>
       </div>
-      <p class="lead">safe-sweep is a small page served from your own computer at <code>127.0.0.1:4777</code>. There is no account, no sign-in, no network calls and no telemetry. This website only explains it. The tool itself never leaves your machine.</p>
+      <p class="shot-note">The page after a scan. Sample sizes.</p>
+    </div>
+  </div>
+
+  <section>
+    <div class="local">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+      <div>
+        <h3>It runs on your machine, not in the cloud</h3>
+        <p>safe-sweep is a small page served from your own computer at <code>127.0.0.1:4777</code>. There is no account, no sign-in, no network calls and no telemetry. This website only explains it. The tool itself never leaves your machine.</p>
+      </div>
     </div>
   </section>
 
-  <section id="how" class="sec container">
-    <div class="sec-head grid">
-      <h2>How it works</h2>
-      <p>Three steps. Sizes are measured, not estimated.</p>
-    </div>
+  <section id="how">
+    <h2>How it works</h2>
+    <p class="intro">Three steps. Sizes are measured, not estimated.</p>
     <ol class="steps">
-      <li class="grid">
-        <div class="text"><h3>Scan</h3><p>Press Scan. safe-sweep measures caches, leftovers and dormant projects.</p></div>
-        <figure>
-          <picture>
-            <source data-dark media="(prefers-color-scheme: dark)" srcset="step-scan-dark.png">
-            <img src="step-scan.png" alt="The disk bar after a scan: 30.2 GB free, with 2.0 GB safe to clear, 934 MB that costs a reinstall and 273 MB left to you" width="1824" height="360" loading="lazy">
-          </picture>
-        </figure>
-      </li>
-      <li class="grid">
-        <div class="text"><h3>Tick</h3><p>Tick what you want gone, one by one or with Select all on each list. Clear selection unticks everything.</p></div>
-        <figure>
-          <picture>
-            <source data-dark media="(prefers-color-scheme: dark)" srcset="step-tick-dark.png">
-            <img src="step-tick.png" alt="The Safe, costs a reinstall list with two idle node_modules folders ticked, and a project used 8 days ago locked as active" width="1824" height="1132" loading="lazy">
-          </picture>
-        </figure>
-      </li>
-      <li class="grid">
-        <div class="text"><h3>Clean</h3><p>Confirm. You see what each item freed and how much free space you really gained.</p></div>
-        <figure class="narrow">
-          <picture>
-            <source data-dark media="(prefers-color-scheme: dark)" srcset="step-clean-dark.png">
-            <img src="step-clean.png" alt="The confirm dialog listing the four ticked items and their sizes, with a Delete 1.4 GB button" width="1152" height="712" loading="lazy">
-          </picture>
-        </figure>
-      </li>
+      <li><b>Scan</b><p>Press Scan. safe-sweep measures caches, leftovers and dormant projects.</p></li>
+      <li><b>Tick</b><p>Tick what you want gone, one by one or with Select all on each list. Clear selection unticks everything.</p></li>
+      <li><b>Clean</b><p>Confirm. You see what each item freed and how much free space you really gained.</p></li>
     </ol>
   </section>
 
-  <section class="sec container">
-    <div class="sec-head grid">
-      <h2>Three lists, sorted by risk</h2>
-      <p>Every item lands in one of three lists, so you always know what a delete will cost you.</p>
-    </div>
-    <ul class="tiers">
-      <li class="grid">
+  <section>
+    <h2>Three lists, sorted by risk</h2>
+    <p class="intro">Every item lands in one of three lists, so you always know what a delete will cost you.</p>
+    <div class="lists">
+      <div class="list safe">
         <h3>Safe to clear</h3>
         <p>Caches and leftovers that rebuild themselves. Nothing of yours is lost.</p>
         <p class="ex">Docker build cache, npm, yarn, pnpm, bun and uv caches, brew cleanup, browser and app caches.</p>
-      </li>
-      <li class="grid">
+      </div>
+      <div class="list reinstall">
         <h3>Safe, costs a reinstall</h3>
         <p>Comes back with a download or an install command.</p>
-        <p class="ex"><code>node_modules</code> in projects idle for 60 days with a committed lockfile, Hugging Face models, Chrome’s on-device AI model.</p>
-      </li>
-      <li class="grid">
+        <p class="ex"><code>node_modules</code> in projects idle for 60 days with a committed lockfile, Hugging Face models, Chrome's on-device AI model.</p>
+      </div>
+      <div class="list review">
         <h3>Your call</h3>
         <p>Shown so you know where space went. Never deleted by safe-sweep.</p>
         <p class="ex">Downloads, Trash, videos, old Node versions, installers, system package caches.</p>
-      </li>
-    </ul>
+      </div>
+    </div>
   </section>
 
-  <section id="safety" class="sec container grid safety">
-    <div class="sec-head">
-      <h2>Built to refuse first</h2>
-      <p>This tool deletes files, so the defaults lean hard towards saying no.</p>
-    </div>
-    <ul class="rules">
+  <section id="safety">
+    <h2>Built to refuse first</h2>
+    <p class="intro">This tool deletes files, so the defaults lean hard towards saying no.</p>
+    <ul class="grid2">
       <li><b>Allowlist</b><span>It deletes only inside a fixed list of paths. Anything else is refused, even if a rule asks for it.</span></li>
       <li><b>Denylist</b><span>Every <code>.git</code> folder, chat data and cloud-synced folders are blocked, whatever else matches.</span></li>
       <li><b>Symlinks checked</b><span>Paths are checked as written and with links resolved. A target that is a link is refused.</span></li>
-      <li><b>Open apps</b><span>An app’s cache stays locked while the app is open. Close the app and you can tick it within seconds, with no new scan. It checks again right before clearing.</span></li>
+      <li><b>Open apps</b><span>An app's cache stays locked while the app is open. Close the app and it unlocks within seconds, with no new scan. It checks again right before clearing.</span></li>
       <li><b>Careful with Docker</b><span>It never runs <code>docker image prune -a</code> or <code>docker volume prune</code>.</span></li>
       <li><b>Logged</b><span>Every clean is written to a log. Run <code>safe-sweep log</code> to read it.</span></li>
-      <li><b>Local only</b><span>Bound to <code>127.0.0.1</code> with a Host check and a per-session token, so other websites can’t trigger a clean.</span></li>
+      <li><b>Local only</b><span>Bound to <code>127.0.0.1</code> with a Host check and a per-session token, so other websites can't trigger a clean.</span></li>
       <li><b>Small, readable guard</b><span>The delete guard is about 40 lines and has its own tests. <a href="https://github.com/d-beloved/safe-sweep/blob/main/src/core/guard.js">Read it</a>.</span></li>
     </ul>
   </section>
 
-  <section class="sec container">
-    <div class="sec-head grid">
-      <h2>Commands</h2>
-      <p>The page does everything, but the terminal works too.</p>
+  <section>
+    <h2>Commands</h2>
+    <p class="intro">The page does everything, but the terminal works too.</p>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">safe-sweep</td><td>Opens the page. Stops after 15 idle minutes.</td></tr>
+          <tr><td class="mono">safe-sweep scan</td><td>Prints the list in the terminal. Deletes nothing.</td></tr>
+          <tr><td class="mono">safe-sweep schedule weekly</td><td>Checks every week and notifies you if space is low. Never deletes.</td></tr>
+          <tr><td class="mono">safe-sweep log</td><td>Shows what was cleaned, when, and how much it freed.</td></tr>
+        </tbody>
+      </table>
     </div>
-    <div class="grid">
-      <div class="tbl">
-        <table>
-          <thead><tr><th>Command</th><th>What it does</th></tr></thead>
-          <tbody>
-            <tr><td class="mono">safe-sweep</td><td>Opens the page. Stops after 15 idle minutes.</td></tr>
-            <tr><td class="mono">safe-sweep scan</td><td>Prints the list in the terminal. Deletes nothing.</td></tr>
-            <tr><td class="mono">safe-sweep schedule weekly</td><td>Checks every week and notifies you if space is low. Never deletes.</td></tr>
-            <tr><td class="mono">safe-sweep log</td><td>Shows what was cleaned, when, and how much it freed.</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="actions">
-        <a class="btn primary" href="https://github.com/d-beloved/safe-sweep#readme">Read the full guide</a>
-        <a class="btn" href="https://github.com/d-beloved/safe-sweep/issues">Report an issue</a>
-      </div>
+    <div class="actions">
+      <a class="btn primary" href="https://github.com/d-beloved/safe-sweep#readme">Read the full guide</a>
+      <a class="btn" href="https://github.com/d-beloved/safe-sweep/issues">Report an issue</a>
     </div>
   </section>
-</main>
 
-<footer class="mast container">
-  <p class="word">safe-sweep</p>
-  <div class="row">
-    <span>MIT license</span>
-    <ul>
-      <li><a class="link" href="https://github.com/d-beloved/safe-sweep">GitHub</a></li>
-      <li><a class="link" href="https://www.npmjs.com/package/@d-beloved/safe-sweep">npm</a></li>
-    </ul>
-  </div>
-</footer>
+  <footer>
+    <span>safe-sweep · MIT license</span>
+    <span><a href="https://github.com/d-beloved/safe-sweep">GitHub</a> · <a href="https://www.npmjs.com/package/@d-beloved/safe-sweep">npm</a></span>
+  </footer>
 
+</div>
 <script>
   // Theme: auto follows the system, light and dark are remembered.
-  // Every capture has a dark source; the switch points them all at the chosen theme.
-  var darkSources = document.querySelectorAll('source[data-dark]');
+  var shotDark = document.getElementById('shotDark');
   function applyTheme(t) {
     if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
     else { t = 'auto'; delete document.documentElement.dataset.theme; }
-    var media = t === 'dark' ? 'all' : t === 'light' ? 'not all' : '(prefers-color-scheme: dark)';
-    darkSources.forEach(function (s) { s.media = media; });
+    shotDark.media = t === 'dark' ? 'all' : t === 'light' ? 'not all' : '(prefers-color-scheme: dark)';
     document.querySelectorAll('.theme button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.theme === t)); });
     return t;
   }
@@ -425,10 +296,7 @@
   document.querySelectorAll('.copy').forEach(function (b) {
     b.addEventListener('click', function () {
       var text = b.getAttribute('data-copy');
-      var done = function () {
-        b.textContent = 'Copied'; b.dataset.state = 'done';
-        setTimeout(function () { b.textContent = 'Copy'; delete b.dataset.state; }, 1500);
-      };
+      var done = function () { b.textContent = 'Copied'; setTimeout(function () { b.textContent = 'Copy'; }, 1500); };
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(done, function () {});
       }
