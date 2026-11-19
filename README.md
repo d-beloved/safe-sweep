@@ -32,7 +32,7 @@ The first run creates `~/.safe-sweep/config.json`. On macOS, Terminal may ask fo
 ## How it works
 
 1. Press **Scan**. Sizes are measured, not estimated.
-2. Tick what you want gone. **Select all safe** ticks the first list.
+2. Tick what you want gone. Each list has a **Select all** box, and **Clear selection** unticks everything. An item that says *Quit Chrome first* (or another app) becomes tickable by itself a few seconds after you close that app. No new scan needed.
 3. Press **Clean selected** and confirm. The result shows what each item freed and how much your free space really went up.
 
 The scan is saved, so refreshing the page keeps it. Cleaning needs a scan from the last hour, because sizes drift.

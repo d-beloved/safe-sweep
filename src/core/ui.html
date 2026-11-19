@@ -75,6 +75,10 @@
   .right{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
   .size{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
   .pill{font-size:11px;font-weight:700;border-radius:4px;padding:2px 7px;white-space:nowrap;background:var(--bad-bg);color:var(--bad)}
+  .pill.ready{background:var(--safe-bg);color:var(--safe)}
+  .selall{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--soft);cursor:pointer;user-select:none}
+  .selall input{width:18px;height:18px;margin:0;accent-color:var(--accent);cursor:pointer}
+  .selall:has(input:disabled){opacity:.5;cursor:default}
   .empty{color:var(--faint);padding:12px 4px;font-size:14px}
   .err{margin-top:16px;background:var(--bad-bg);color:var(--bad);border-radius:10px;padding:10px 14px;font-size:13px}
   .hint{margin-top:40px;color:var(--soft);font-size:13px}
@@ -194,7 +198,7 @@
   <div class="in">
     <div class="sel"><b id="selGB">0 GB</b> selected · <span id="selN">0</span> items</div>
     <div>
-      <button id="allSafe" disabled>Select all safe</button>
+      <button id="clearSel" disabled>Clear selection</button>
       <button class="primary" id="cleanBtn" disabled>Clean selected</button>
     </div>
   </div>
@@ -275,12 +279,14 @@ function render() {
       return `<div class="row-item ${i.selectable || i.action.kind === 'reveal' ? '' : 'off'}">
         <div>${box}</div>
         <div><div class="t">${esc(i.title)}</div><div class="d">${esc(i.detail)}</div>${i.cost ? `<div class="c">${esc(i.cost)}</div>` : ''}${paths}</div>
-        <div class="right"><span class="size">${fmt(i.bytes)}</span>${i.blocked ? `<span class="pill">${esc(i.blocked)}</span>` : ''}${i.paths.length ? `<button class="link" data-reveal="${esc(i.id)}">Show in ${esc(settings?.platform?.fileManager || 'file manager')}</button>` : ''}</div>
+        <div class="right"><span class="size">${fmt(i.bytes)}</span>${i.blocked ? `<span class="pill"${i.apps?.length ? ' title="This updates by itself once the app is closed."' : ''}>${esc(i.blocked)}</span>` : nowReady.has(i.id) ? '<span class="pill ready">Ready to clean</span>' : ''}${i.paths.length ? `<button class="link" data-reveal="${esc(i.id)}">Show in ${esc(settings?.platform?.fileManager || 'file manager')}</button>` : ''}</div>
       </div>`;
     }).join('');
-    return `<section><div class="shead"><h2>${title}</h2><p>${blurb}</p></div>${rows || '<div class="empty">Nothing here.</div>'}</section>`;
+    const all = tier === 'review' ? '' : `<label class="selall"><input type="checkbox" data-tier="${tier}"> Select all</label>`;
+    return `<section><div class="shead"><h2>${title}</h2>${all}<p>${blurb}</p></div>${rows || '<div class="empty">Nothing here.</div>'}</section>`;
   }).join('');
   updateFoot();
+  scheduleRecheck();
 }
 
 function updateFoot() {
@@ -288,9 +294,18 @@ function updateFoot() {
   $('selGB').textContent = fmt(bytes);
   $('selN').textContent = selected.size;
   $('cleanBtn').disabled = !selected.size || isStale();
-  $('allSafe').disabled = !data;
+  $('clearSel').disabled = !selected.size;
+  // Each list's "Select all" box: ticked when every item that can be cleaned is, dashed when some are.
+  document.querySelectorAll('#list input[data-tier]').forEach((box) => {
+    const ids = tierIds(box.dataset.tier);
+    const n = ids.filter((id) => selected.has(id)).length;
+    box.disabled = !ids.length;
+    box.checked = !!ids.length && n === ids.length;
+    box.indeterminate = n > 0 && n < ids.length;
+  });
   store.set([...selected]);
 }
+const tierIds = (tier) => data ? data.items.filter((i) => i.tier === tier && i.selectable).map((i) => i.id) : [];
 
 async function doScan() {
   const b = $('scanBtn');
@@ -298,6 +313,7 @@ async function doScan() {
   $('cleanBtn').disabled = true;
   try {
     data = await api('/api/scan');
+    nowReady.clear();
     for (const id of [...selected]) if (!data.items.find((i) => i.id === id && i.selectable)) selected.delete(id);
     render();
   } catch (e) {
@@ -395,6 +411,11 @@ $('stopBtn').onclick = async () => {
   document.querySelector('.foot').remove();
 };
 $('list').addEventListener('change', (e) => {
+  const tier = e.target.dataset?.tier;
+  if (tier) {
+    for (const id of tierIds(tier)) e.target.checked ? selected.add(id) : selected.delete(id);
+    return render();
+  }
   const id = e.target.dataset?.id; if (!id) return;
   e.target.checked ? selected.add(id) : selected.delete(id);
   updateFoot();
@@ -403,10 +424,42 @@ $('list').addEventListener('click', (e) => {
   const id = e.target.dataset?.reveal; if (!id) return;
   api('/api/reveal', { id }).catch((err) => alert(err.message));
 });
-$('allSafe').onclick = () => {
-  data.items.filter((i) => i.tier === 'safe' && i.selectable).forEach((i) => selected.add(i.id));
-  render();
-};
+$('clearSel').onclick = () => { selected.clear(); render(); };
+
+// ---------- Items waiting for an app to quit ----------
+// While an item says "Quit Chrome first", ask every few seconds whether Chrome is still open.
+// Once it's closed, the item can be ticked without scanning again.
+const RECHECK_MS = 4000;
+const nowReady = new Set(); // items freed up since the last scan
+let recheckTimer = null;
+let rechecking = false;
+let cleaning = false;
+const waitingOnApp = () => !!data?.items.some((i) => i.apps?.length && i.blocked);
+function scheduleRecheck() {
+  clearTimeout(recheckTimer);
+  if (waitingOnApp() && !document.hidden && !cleaning) recheckTimer = setTimeout(recheck, RECHECK_MS);
+}
+async function recheck() {
+  if (rechecking || cleaning || !data) return;
+  rechecking = true;
+  const at = data.at;
+  try {
+    const r = await api('/api/recheck');
+    if (r.changed && data && data.at === at && r.scan.at === at && !cleaning) {
+      const was = new Map(data.items.map((i) => [i.id, i.selectable]));
+      for (const i of r.scan.items) {
+        if (i.selectable && was.get(i.id) === false) nowReady.add(i.id);
+        if (!i.selectable) { selected.delete(i.id); nowReady.delete(i.id); }
+      }
+      data = r.scan;
+      render();
+    }
+  } catch { rechecking = false; return; } // the server stopped; stop asking
+  rechecking = false;
+  scheduleRecheck();
+}
+// Check right away when you come back to this tab, e.g. after quitting the app.
+document.addEventListener('visibilitychange', () => document.hidden ? clearTimeout(recheckTimer) : waitingOnApp() && recheck());
 $('cleanBtn').onclick = () => {
   const items = data.items.filter((i) => selected.has(i.id));
   $('confirmList').innerHTML = items.map((i) => `<li>${esc(i.title)} · <b>${fmt(i.bytes)}</b></li>`).join('');
@@ -416,6 +469,7 @@ $('cleanBtn').onclick = () => {
 $('cancel').onclick = () => $('confirm').close();
 $('go').onclick = async () => {
   const go = $('go'); go.disabled = true; go.innerHTML = '<span class="spin"></span>Cleaning…';
+  cleaning = true; clearTimeout(recheckTimer);
   try {
     const r = await api('/api/clean', { ids: [...selected] });
     $('confirm').close();
@@ -437,13 +491,13 @@ $('go').onclick = async () => {
     $('doneList').innerHTML = r.results.map((x) => x.ok
       ? `<li class="res-ok">${esc(x.title)} · ${fmt(x.freed)}${x.expected && x.freed != null && x.expected - x.freed > 0.2e9 ? ` <span class="c">(scanned ${fmt(x.expected)})</span>` : ''}${x.insideDocker ? ' <span class="c">inside Docker</span>' : ''}</li>`
       : `<li class="res-bad">${esc(x.title || x.id)} · ${esc(x.error)}</li>`).join('');
-    selected.clear(); store.set([]);
+    selected.clear(); store.set([]); nowReady.clear();
     data = null; $('list').innerHTML = ''; $('disk').hidden = true; $('when').textContent = 'Cleaned. Scan again to see the new numbers.'; updateFoot();
     $('done').showModal();
   } catch (e) {
     $('confirm').close();
     alert(e.message);
-  } finally { go.disabled = false; }
+  } finally { go.disabled = false; cleaning = false; scheduleRecheck(); }
 };
 $('doneOk').onclick = () => { $('done').close(); doScan(); };
 function applyTheme(t) {

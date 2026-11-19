@@ -2,7 +2,7 @@ import http from 'node:http';
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { scan } from './scan.js';
+import { scan, recheckApps } from './scan.js';
 import { clean } from './clean.js';
 import { STATE_DIR, HOME } from './util.js';
 import { platform } from '../platform/index.js';
@@ -52,10 +52,12 @@ export async function startServer(cfg, { onListening } = {}) {
   };
 
   const server = http.createServer(async (req, res) => {
-    touch();
+    const url = new URL(req.url, 'http://127.0.0.1');
+    // The page re-checks app-blocked items every few seconds. That alone isn't use,
+    // so an open tab can't keep the server up past its idle time.
+    if (url.pathname !== '/api/recheck') touch();
     // Blocks DNS-rebinding: only our own host names are served.
     if (!hosts.has(req.headers.host)) return send(res, 403, { error: 'Bad host' });
-    const url = new URL(req.url, `http://${req.headers.host}`);
 
     if (req.method === 'GET' && url.pathname === '/') {
       const html = (await fs.readFile(UI, 'utf8')).replace('__TOKEN__', token);
@@ -85,6 +87,17 @@ export async function startServer(cfg, { onListening } = {}) {
           lastScan = await scanning;
           await saveScan(lastScan);
           return send(res, 200, lastScan);
+        }
+
+        case '/api/recheck': {
+          // An item says "Quit Chrome first". Once Chrome is closed, it can be cleaned
+          // without a fresh scan. Cleaning checks the apps again anyway.
+          const s = lastScan;
+          if (busy || scanning || !s) return send(res, 200, { changed: false });
+          const changed = await recheckApps(s);
+          if (!changed || s !== lastScan || busy) return send(res, 200, { changed: false }); // a clean or scan started meanwhile
+          await saveScan(s);
+          return send(res, 200, { changed: true, scan: s });
         }
 
         case '/api/clean': {
