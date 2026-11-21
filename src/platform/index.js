@@ -7,6 +7,7 @@
 //   allow, deny  RegExp[] matched against paths relative to home
 //   blockedBy(...appKeys)  returns "Quit X first" or null
 //   notify(title, message), reveal(path), openUrl(url)
+//   emptyTrash() empties the user's Trash the way the file manager does; returns run()'s result
 //   schedule     { read, set, describe } or null if not supported yet
 //   launchers    { read, createApp, createShortcut? } or null; read() returns { app, shortcut|null }
 //

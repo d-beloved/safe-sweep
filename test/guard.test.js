@@ -25,6 +25,11 @@ before(async () => {
   mk('Projects/app/.git');
   mk('Projects/app/_to_delete');
   mk('elsewhere/node_modules');
+  mk('Library/Application Support/Claude/vm_bundles/claudevm.bundle');
+  mk('Downloads');
+  mk('.Trash');
+  for (const f of ['Setup.dmg', 'Tool.pkg', 'Downloads/Other.dmg', 'notes.txt']) fs.writeFileSync(path.join(FAKE, f), 'x');
+  fs.symlinkSync(path.join(FAKE, 'Movies'), path.join(FAKE, 'Linked.dmg'));
   fs.symlinkSync(path.join(FAKE, 'Movies'), path.join(FAKE, 'Library/Caches/evil'));
   fs.symlinkSync(path.join(FAKE, 'Movies'), path.join(FAKE, 'Projects/app/linked'));
   fs.mkdirSync(path.join(FAKE, 'Movies/node_modules'));
@@ -79,4 +84,17 @@ test('refuses relative, unnormalised and outside-home paths', async () => {
   await refuses(H('Library/Caches/../../Movies'));
   await refuses('/etc');
   await refuses('/');
+});
+
+test('allows the Your call items it can delete, and refuses their neighbours', async () => {
+  await allows(H('Library/Application Support/Claude/vm_bundles'));
+  await allows(H('Setup.dmg'));
+  await allows(H('Tool.pkg'));
+  await refuses(H('Library/Application Support/Claude'));
+  await refuses(H('Library/Application Support/Claude/vm_bundles/claudevm.bundle'));
+  await refuses(H('Downloads/Other.dmg')); // only installers sitting directly in home
+  await refuses(H('Downloads'));
+  await refuses(H('notes.txt'));
+  await refuses(H('Linked.dmg')); // a symlink, even with an installer's name
+  await refuses(H('.Trash')); // emptied through Finder, never by path
 });

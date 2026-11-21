@@ -56,7 +56,11 @@ export async function ls(dir) {
 
 /** Is an app running? Matches the app bundle's executable path. */
 export async function running(bundlePattern) {
-  return (await run('pgrep', ['-f', bundlePattern])).ok;
+  // macOS pgrep leaves out its own parent processes unless given -a. Without it, an app
+  // whose built-in terminal started safe-sweep (Cursor, Claude) would look closed.
+  // On Linux, -a means something else and parents are always included.
+  const args = process.platform === 'darwin' ? ['-a', '-f', bundlePattern] : ['-f', bundlePattern];
+  return (await run('pgrep', args)).ok;
 }
 
 /** Parse Docker-style size strings: "1.2GB", "345.6MB", "12kB", "0B". */

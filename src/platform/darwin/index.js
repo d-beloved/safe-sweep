@@ -16,6 +16,8 @@ export default {
   notify: (title, message) => run('osascript', ['-e', `display notification ${q(message)} with title ${q(title)}`]),
   reveal: (p) => run('open', ['-R', p]),
   openUrl: (u) => run('open', [u]),
+  // Finder empties the Trash itself: the folder can't be read without Full Disk Access.
+  emptyTrash: () => run('osascript', ['-e', 'tell application "Finder" to empty trash'], { timeout: 600_000 }),
   schedule: { read: schedule.readSchedule, set: schedule.setSchedule, describe: schedule.describe },
   launchers: { read: launchers.readLaunchers, createApp: launchers.createApp, createShortcut: launchers.createShortcut },
 };

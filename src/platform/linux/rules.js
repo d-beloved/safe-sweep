@@ -88,34 +88,50 @@ async function reinstallItems() {
 
 // ---------- Report only ----------
 
+// Most of these are only listed, with steps to clear them by hand. A few can be deleted
+// here once ticked: those carry a warning that the page shows before it deletes.
+const BY_HAND_FILES = 'Open it in your file manager and sort by size. Select what you don’t need and press Shift+Delete to delete it right away, without the Trash.';
+
 async function reviewItems() {
   const list = [
-    [H('.local/share/Trash'), 'Trash', 'Deleted files still take space until you empty the Trash in your file manager.'],
-    [H('Downloads'), 'Downloads', 'Usually mostly disposable. Sort by size in your file manager.'],
-    [H('Videos'), 'Videos folder', 'Camera originals are irreplaceable. Copy to an external drive and check the copy before deleting.'],
-    [H('.nvm/versions'), 'Node versions (nvm)', 'Old versions may be pinned by a project’s .nvmrc. Check with nvm ls first.'],
-    [H('.rbenv/versions'), 'Ruby versions (rbenv)', 'Check rbenv versions before removing one.'],
-    [H('.local/share/flatpak'), 'Flatpak apps (yours)', 'Run flatpak uninstall --unused to remove runtimes no app uses.'],
-    ['/var/lib/flatpak', 'Flatpak apps (system)', 'Run flatpak uninstall --unused to remove runtimes no app uses.'],
-    ['/var/cache/apt/archives', 'apt package downloads', 'Packages already installed. Run sudo apt clean to remove them.'],
-    ['/var/cache/dnf', 'dnf package cache', 'Run sudo dnf clean all to remove it.'],
-    ['/var/cache/pacman/pkg', 'pacman package cache', 'Run sudo paccache -r to keep only the last three versions.'],
-    ['/var/lib/snapd/snaps', 'Snap packages', 'Old versions are kept for rollback. Run sudo snap set system refresh.retain=2 to keep fewer.'],
-    ['/var/log/journal', 'System journal', 'Run sudo journalctl --vacuum-time=2weeks to drop older logs.'],
+    { p: H('.local/share/Trash'), title: 'Trash', detail: 'Files you deleted still take space until the Trash is emptied.',
+      warning: 'Empties the Trash for good. You can’t restore these files after this.', action: { kind: 'trash' } },
+    { p: H('Downloads'), title: 'Downloads', detail: 'Usually mostly disposable.', howTo: BY_HAND_FILES },
+    { p: H('Videos'), title: 'Videos folder', detail: 'Camera originals are irreplaceable.',
+      howTo: `Copy anything you want to keep to an external drive and check the copy first. ${BY_HAND_FILES}` },
+    { p: H('.nvm/versions'), title: 'Node versions (nvm)', detail: 'A project’s .nvmrc may pin an old version.',
+      howTo: 'List the versions, then run nvm uninstall <version> for each one you don’t need. Keep the one marked default.', cmd: 'nvm ls' },
+    { p: H('.rbenv/versions'), title: 'Ruby versions (rbenv)', detail: 'A project’s .ruby-version may pin an old version.',
+      howTo: 'List the versions, then run rbenv uninstall <version> for each one you don’t need.', cmd: 'rbenv versions' },
+    { p: H('.local/share/flatpak'), title: 'Flatpak apps (yours)', detail: 'Runtimes no app uses any more can go.',
+      howTo: 'Run this in a terminal.', cmd: 'flatpak uninstall --user --unused' },
+    { p: '/var/lib/flatpak', title: 'Flatpak apps (system)', detail: 'Runtimes no app uses any more can go.',
+      howTo: 'Run this in a terminal.', cmd: 'flatpak uninstall --unused' },
+    { p: '/var/cache/apt/archives', title: 'apt package downloads', detail: 'Copies of packages that are already installed.',
+      howTo: 'Run this in a terminal. It asks for your password.', cmd: 'sudo apt clean' },
+    { p: '/var/cache/dnf', title: 'dnf package cache', detail: 'Copies of packages that are already installed.',
+      howTo: 'Run this in a terminal. It asks for your password.', cmd: 'sudo dnf clean all' },
+    { p: '/var/cache/pacman/pkg', title: 'pacman package cache', detail: 'Old package versions kept for downgrades.',
+      howTo: 'Run this in a terminal to keep only the last three versions. It asks for your password.', cmd: 'sudo paccache -r' },
+    { p: '/var/lib/snapd/snaps', title: 'Snap packages', detail: 'Old versions are kept for rollback.',
+      howTo: 'Run this in a terminal to keep fewer old versions. Snap drops the extras at its next refresh.', cmd: 'sudo snap set system refresh.retain=2' },
+    { p: '/var/log/journal', title: 'System journal', detail: 'System logs.',
+      howTo: 'Run this in a terminal to drop logs older than two weeks. It asks for your password.', cmd: 'sudo journalctl --vacuum-time=2weeks' },
   ];
   const out = [];
-  for (const [p, title, detail] of list) {
+  for (const { p, detail, ...rest } of list) {
     if (!(await exists(p))) continue;
     const bytes = await du(p);
     if (bytes === 0) continue;
-    out.push(item({ id: `rv:${p}`, tier: 'review', title, bytes, paths: [p],
-      detail: bytes === null ? `${detail} (Couldn’t measure: you may not have read access.)` : detail,
-      action: { kind: 'reveal', path: p } }));
+    out.push(item({ id: `rv:${p}`, tier: 'review', bytes, paths: [p], action: { kind: 'reveal', path: p }, ...rest,
+      detail: bytes === null ? `${detail} (Couldn’t measure: you may not have read access.)` : detail }));
   }
   const loose = (await ls(HOME)).filter((n) => /\.(deb|rpm)$/i.test(n)).map((n) => H(n));
   if (loose.length) {
     out.push(item({ id: 'rv:loose-installers', tier: 'review', title: 'Installers in your home folder', bytes: await duMany(loose), paths: loose,
-      detail: 'Probably already installed. Check, then move to the Trash.', action: { kind: 'reveal', path: loose[0] } }));
+      detail: 'Probably already installed.',
+      warning: 'Deletes these installer files for good. They don’t go to the Trash. Check each package is installed first.',
+      action: { kind: 'rm', paths: loose } }));
   }
   return out;
 }
@@ -127,8 +143,9 @@ const esc = (s) => s.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
 export const ALLOW = [
   new RegExp(`^\\.cache\\/(${[...APP_CACHES.map((c) => c.name), ...DEV_CACHES.map(([n]) => n)].map(esc).join('|')})$`),
   /^\.config\/(google-chrome|chromium)\/([^/]+\/)?OptGuideOnDeviceModel$/,
+  /^[^/]+\.(deb|rpm)$/i, // installers sitting directly in home, nowhere deeper
 ];
-// Never on Linux, even if a pattern above matches.
+// Never on Linux, even if a pattern above matches. The Trash is emptied with gio, never by path.
 export const DENY = [
   /(^|\/)\.local\/share\/Trash(\/|$)/, /(^|\/)\.ssh(\/|$)/, /(^|\/)\.gnupg(\/|$)/,
   /whatsapp/i, /(^|\/)(Dropbox|Nextcloud|ownCloud|OneDrive|pCloudDrive|Google Drive|MEGA)(\/|$)/,

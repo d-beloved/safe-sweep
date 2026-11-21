@@ -2,11 +2,14 @@
 //
 // tier:  'safe'      cache or leftover; nothing of yours is lost
 //        'reinstall' safe, but costs a reinstall or re-download later
-//        'review'    shown for information; the tool never deletes these
+//        'review'    your call. Most are only listed, with steps to clear them by hand
+//                    (howTo, and cmd for a command to copy). A few can be deleted here:
+//                    those have a delete action and a warning shown before they go.
 //
 // action.kind:  'cmd'    run the tool's own cleanup command
 //               'rm'     delete the listed paths
 //               'empty'  delete the folder's contents, keep the folder
+//               'trash'  empty the Trash through the platform (Finder, gio)
 //               'reveal' report only: a button shows it in your file manager
 //
 // Lessons kept from the Aug 2026 triage:
@@ -25,7 +28,7 @@ import { TEMPORARY } from './schedule.js';
 
 const H = (...p) => path.join(HOME, ...p);
 
-export const item = (o) => ({ blocked: null, cost: '', paths: [], ...o });
+export const item = (o) => ({ blocked: null, cost: '', howTo: '', cmd: '', warning: '', paths: [], ...o });
 
 // ---------- Docker ----------
 

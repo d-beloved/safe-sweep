@@ -15,6 +15,7 @@ const APPS = {
   spotify: { name: 'Spotify', pattern: appRe('Spotify') },
   cursor: { name: 'Cursor', pattern: appRe('Cursor') },
   codex: { name: 'Codex', pattern: appRe('Codex') },
+  claude: { name: 'Claude', pattern: appRe('Claude') },
 };
 
 export async function blockedBy(...apps) {
@@ -112,36 +113,54 @@ async function dockerDisk() {
   if (!(await exists(raw))) return [];
   return [item({ id: 'docker-disk', tier: 'review', title: 'Docker virtual disk', bytes: await du(raw),
     detail: 'Pruning frees space inside this file. It may not shrink on your real disk until Docker Desktop restarts. Images and volumes are not touched by this tool: with zero containers, Docker treats all of them as unused.',
+    howTo: 'List your images, remove the ones you no longer use with docker rmi, then quit and reopen Docker Desktop. Troubleshoot → Clean / Purge data in Docker Desktop empties it completely, including every image, container and volume.',
+    cmd: 'docker images',
     paths: [raw], action: { kind: 'reveal', path: raw } })];
 }
 
-// ---------- Report only ----------
+// ---------- Your call ----------
+// Most of these are only listed, with steps to clear them by hand. A few can be deleted
+// here once ticked: those carry a warning that the page shows before it deletes.
+
+const BY_HAND_FINDER = 'Open it in Finder, choose View → as List and sort by Size. Select what you don’t need and press Option-Command-Delete to delete it right away, without the Trash.';
 
 async function reviewItems() {
   const list = [
-    [LIB('Group Containers/group.net.whatsapp.WhatsApp.shared'), 'WhatsApp media and chats',
-      'Never delete this folder: your chat database is inside. Use WhatsApp → Settings → Storage and Data → Manage Storage, and set media auto-download to Never first.'],
-    [LIB('Application Support/Claude/vm_bundles'), 'Claude desktop VM image', 'Re-downloads on next local session. Quit Claude first.'],
-    [LIB('Application Support/Cursor/User/globalStorage/state.vscdb'), 'Cursor live database', 'Deleting it loses Cursor chat history.'],
-    [H('Movies'), 'Movies folder', 'Camera originals are irreplaceable. Copy to an external drive and check the copy before deleting.'],
-    [H('.nvm/versions'), 'Node versions (nvm)', 'Old versions may be pinned by a project’s .nvmrc. Check with nvm ls first.'],
-    [H('.rbenv/versions'), 'Ruby versions (rbenv)', 'Check rbenv versions before removing one.'],
-    [H('.Trash'), 'Trash', 'Finder deletions still take space until you empty the Trash.'],
-    [H('Downloads'), 'Downloads', 'Usually mostly disposable. Sort by size in Finder.'],
+    { p: LIB('Group Containers/group.net.whatsapp.WhatsApp.shared'), title: 'WhatsApp media and chats',
+      detail: 'Your chat database is inside. This tool never deletes it.',
+      howTo: 'In WhatsApp, go to Settings → Storage and Data → Manage Storage and delete large media there. Set media auto-download to Never so it doesn’t fill up again.' },
+    { p: LIB('Application Support/Cursor/User/globalStorage/state.vscdb'), title: 'Cursor live database',
+      detail: 'Holds your Cursor chat history. This tool never deletes it.',
+      howTo: 'Delete old chats inside Cursor. Don’t delete the file itself.' },
+    { p: H('Movies'), title: 'Movies folder', detail: 'Camera originals are irreplaceable.',
+      howTo: `Copy anything you want to keep to an external drive and check the copy first. ${BY_HAND_FINDER}` },
+    { p: H('Downloads'), title: 'Downloads', detail: 'Usually mostly disposable.', howTo: BY_HAND_FINDER },
+    { p: H('.nvm/versions'), title: 'Node versions (nvm)', detail: 'A project’s .nvmrc may pin an old version.',
+      howTo: 'List the versions, then run nvm uninstall <version> for each one you don’t need. Keep the one marked default.', cmd: 'nvm ls' },
+    { p: H('.rbenv/versions'), title: 'Ruby versions (rbenv)', detail: 'A project’s .ruby-version may pin an old version.',
+      howTo: 'List the versions, then run rbenv uninstall <version> for each one you don’t need.', cmd: 'rbenv versions' },
+    { p: LIB('Application Support/Claude/vm_bundles'), title: 'Claude desktop VM image',
+      detail: 'The disk image Claude uses for local sessions.', ...(await appGuard('claude')),
+      warning: 'Claude downloads this again the next time it starts a local session.',
+      action: { kind: 'rm', paths: [LIB('Application Support/Claude/vm_bundles')] } },
+    { p: H('.Trash'), title: 'Trash', detail: 'Files you deleted in Finder still take space until the Trash is emptied.',
+      warning: 'Empties the Trash for good, on every drive. Put Back won’t work after this. The first time, macOS asks to let Safe Sweep control Finder.',
+      action: { kind: 'trash' } },
   ];
   const out = [];
-  for (const [p, title, detail] of list) {
+  for (const { p, detail, ...rest } of list) {
     if (!(await exists(p))) continue;
     const bytes = await du(p);
-    out.push(item({ id: `rv:${p}`, tier: 'review', title, bytes, paths: [p],
-      detail: bytes === null ? `${detail} (Couldn’t measure: Terminal may need Full Disk Access.)` : detail,
-      action: { kind: 'reveal', path: p } }));
+    out.push(item({ id: `rv:${p}`, tier: 'review', bytes, paths: [p], action: { kind: 'reveal', path: p }, ...rest,
+      detail: bytes === null ? `${detail} (Couldn’t measure: Terminal may need Full Disk Access.)` : detail }));
   }
   // Loose installers in your home folder
   const loose = (await ls(HOME)).filter((n) => /\.(pkg|dmg)$/i.test(n)).map((n) => H(n));
   if (loose.length) {
     out.push(item({ id: 'rv:loose-installers', tier: 'review', title: 'Installers in your home folder', bytes: await duMany(loose), paths: loose,
-      detail: 'Probably already installed. Check, then drag to Trash.', action: { kind: 'reveal', path: loose[0] } }));
+      detail: 'Probably already installed.',
+      warning: 'Deletes these installer files for good. They don’t go to the Trash. Check each app is installed first.',
+      action: { kind: 'rm', paths: loose } }));
   }
   return out;
 }
@@ -155,6 +174,8 @@ export const ALLOW = [
   /^Library\/Application Support\/Adobe\/com\.adobe\.ARMDC\.ARM\/[^/]+\.pkg$/,
   /^Library\/Application Support\/com\.docker\.install$/,
   /^Library\/Application Support\/Google\/Chrome\/([^/]+\/)?OptGuideOnDeviceModel$/,
+  /^Library\/Application Support\/Claude\/vm_bundles$/,
+  /^[^/]+\.(pkg|dmg)$/i, // installers sitting directly in home, nowhere deeper
 ];
 // Never on macOS, even if a pattern above matches.
 export const DENY = [/group\.net\.whatsapp/i, /CloudStorage/, /Mobile Documents/];

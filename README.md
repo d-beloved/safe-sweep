@@ -46,14 +46,17 @@ The scan is saved, so refreshing the page keeps it. Cleaning needs a scan from t
 - its lockfile is committed to git, so a reinstall gives the same versions,
 - its path doesn't match anything in your `protect` list.
 
-**Your call.** Shown so you know where space went, with a button to open the folder. safe-sweep never deletes these: Downloads, Trash, Movies or Videos, old Node and Ruby versions, loose installers. On macOS also WhatsApp media and Docker's virtual disk. On Linux also apt, dnf, pacman and Snap package caches, Flatpak runtimes and the system journal, each with the command that clears it. Those need `sudo`, and safe-sweep never asks for it.
+**Your call.** Your files and app data, each with a button to open the folder and the steps to clear it by hand. Where the steps are a command, there's a Copy button.
+
+- **Can be deleted here, after a warning:** the Trash (emptied through Finder on macOS, `gio` on Linux), installers sitting directly in your home folder (`.pkg`/`.dmg`, `.deb`/`.rpm`), and on macOS the Claude desktop VM image. These are never in "Select all". You tick each one, and the confirm box repeats its warning.
+- **Steps only, never deleted by safe-sweep:** Downloads, Movies or Videos, old Node and Ruby versions. On macOS also WhatsApp media, Cursor's live database and Docker's virtual disk. On Linux also apt, dnf, pacman and Snap package caches, Flatpak runtimes and the system journal. Those commands need `sudo`, and safe-sweep never asks for it.
 
 ## Safety
 
 This tool deletes files, so it is built to refuse first.
 
 - **Allowlist.** It deletes only inside a fixed list of path patterns per OS (`src/core/rules.js` plus `src/platform/<os>/rules.js`). Anything else is refused, even if a rule asks for it.
-- **Denylist.** Every `.git` folder, chat data (WhatsApp), and cloud-synced folders (iCloud, Google Drive, Dropbox, OneDrive, Nextcloud) are blocked even if an allowlist pattern matches. On Linux, so are the Trash, `~/.ssh` and `~/.gnupg`.
+- **Denylist.** Every `.git` folder, chat data (WhatsApp), and cloud-synced folders (iCloud, Google Drive, Dropbox, OneDrive, Nextcloud) are blocked even if an allowlist pattern matches. On Linux, so are `~/.ssh`, `~/.gnupg` and the Trash folder itself: the Trash is only ever emptied through the system's own command, and only for your real home folder.
 - **Symlinks.** Paths are checked as written and with symlinks resolved. A target that is itself a symlink is refused.
 - **Open apps.** It re-checks that the app is closed (Chrome, Firefox, Spotify, Cursor, Codex) right before clearing its cache.
 - **Docker.** It never runs `docker image prune -a` or `docker volume prune`. With zero containers, Docker counts every image and volume as unused, including the ones you need.

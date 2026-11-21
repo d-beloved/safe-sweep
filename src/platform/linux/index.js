@@ -16,6 +16,9 @@ export default {
   // xdg-open can't select a file, so open the folder it sits in.
   reveal: (p) => run('xdg-open', [path.dirname(p)]),
   openUrl: (u) => run('xdg-open', [u]),
+  // gio empties the Trash the way the file manager does, including its records of what was where.
+  emptyTrash: async () => (await has('gio')) ? run('gio', ['trash', '--empty'])
+    : { ok: false, stderr: 'Empty the Trash from your file manager.' },
   schedule: { read: schedule.readSchedule, set: schedule.setSchedule, describe: schedule.describe },
   launchers: { read: launchers.readLaunchers, createApp: launchers.createApp },
 };

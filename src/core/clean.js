@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
-import { STATE_DIR, run, duMany, diskFree } from './util.js';
+import { HOME, STATE_DIR, run, duMany, diskFree } from './util.js';
 import { MEASURE, ALLOW, DENY } from './rules.js';
 import { makeGuard } from './guard.js';
 import { platform } from '../platform/index.js';
@@ -15,6 +16,13 @@ export const guard = makeGuard({
 async function log(entry) {
   await fs.mkdir(STATE_DIR, { recursive: true });
   await fs.appendFile(path.join(STATE_DIR, 'log.jsonl'), JSON.stringify({ at: new Date().toISOString(), ...entry }) + '\n');
+}
+
+function trashError(r) {
+  const msg = (r.stderr || r.stdout || '').trim();
+  // macOS: the user said no, or turned it off, in Settings → Privacy & Security → Automation.
+  if (/-1743|not authori[sz]ed/i.test(msg)) return 'Not allowed to control Finder. Allow it in System Settings → Privacy & Security → Automation, or empty the Trash in Finder.';
+  return msg.split('\n').slice(-2).join(' ') || 'Couldn’t empty the Trash. Empty it from your file manager.';
 }
 
 async function cleanOne(item, cfg) {
@@ -41,6 +49,14 @@ async function cleanOne(item, cfg) {
       try { await fs.rm(child, { recursive: true, force: true }); }
       catch (e) { if (e.code !== 'EPERM' && e.code !== 'EACCES' && e.code !== 'EBUSY') throw e; } // skip files an app holds open
     }
+  } else if (a.kind === 'trash') {
+    if (!platform.emptyTrash) throw new Error('Empty the Trash from your file manager.');
+    // Finder and gio empty the real Trash whatever HOME says. With a stand-in home
+    // (tests, development) that would hit the real one, so refuse.
+    const real = (p) => fs.realpath(p).catch(() => p);
+    if (await real(HOME) !== await real(os.userInfo().homedir)) throw new Error('Refused: the Trash is only emptied for your own home folder.');
+    const r = await platform.emptyTrash();
+    if (!r.ok) throw new Error(trashError(r));
   } else {
     throw new Error(`Unknown action ${a.kind}`);
   }

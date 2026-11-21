@@ -54,6 +54,7 @@ async function main() {
     for (const i of r.items) {
       const tag = i.tier === 'review' ? 'REVIEW ' : i.blocked ? 'BLOCKED' : i.tier === 'safe' ? 'SAFE   ' : 'REINST ';
       console.log(`${tag} ${fmt(i.bytes).padStart(8)}  ${i.title}${i.blocked ? `  (${i.blocked})` : ''}`);
+      if (i.cmd) console.log(`${' '.repeat(18)}by hand: ${i.cmd}`);
     }
     for (const e of r.errors) console.error(`! ${e}`);
     return;

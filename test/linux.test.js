@@ -22,6 +22,11 @@ before(async () => {
     '.cache/huggingface', '.cache/unknown-app', '.cache/keyring', '.config/google-chrome/Default/OptGuideOnDeviceModel',
     '.config/google-chrome/Default/Cookies', '.config/Code/User', '.local/share/Trash/files', '.ssh', 'Dropbox/.cache/pip',
     'Videos', 'Projects/app/node_modules', 'Projects/app/src', BIN_DIR.slice(FAKE.length + 1)]) mk(d);
+  for (const f of ['.local/share/Trash/files/old.txt', 'tool.deb', 'Downloads/pkg.deb']) {
+    fs.mkdirSync(path.dirname(H(f)), { recursive: true });
+    fs.writeFileSync(H(f), 'x'.repeat(8192));
+  }
+  fs.writeFileSync(path.join(BIN_DIR, 'gio'), `#!/bin/sh\necho "gio $*" >> '${CALLS}'\nexit 0\n`, { mode: 0o755 });
   fs.writeFileSync(path.join(BIN_DIR, 'systemctl'),
     `#!/bin/sh\necho "$*" >> '${CALLS}'\ncase "$*" in *is-active*) echo active ;; esac\nexit 0\n`, { mode: 0o755 });
 
@@ -69,6 +74,32 @@ test('refuses the neighbours of what it allows', async () => {
   await refuses(H('Dropbox/.cache/pip'));
   await refuses(H('Videos'));
   await refuses(H('Projects/app/src'));
+  await refuses(H('Downloads/pkg.deb')); // only installers sitting directly in home
+  await refuses(H('Downloads'));
+});
+
+test('allows installers sitting directly in home', async () => {
+  await allows(H('tool.deb'));
+});
+
+test('Your call items either explain how to clear them by hand or warn before deleting', async () => {
+  const { scan } = await import('../src/core/scan.js');
+  const { items } = await scan({ projectRoots: [], protect: [], dormantDays: 60 });
+  const review = items.filter((i) => i.tier === 'review');
+  const byId = Object.fromEntries(review.map((i) => [i.id, i]));
+  const trash = byId[`rv:${H('.local/share/Trash')}`];
+  assert.equal(trash.action.kind, 'trash'); assert.ok(trash.selectable); assert.ok(trash.warning);
+  const loose = byId['rv:loose-installers'];
+  assert.deepEqual(loose.action, { kind: 'rm', paths: [H('tool.deb')] }); assert.ok(loose.warning);
+  const dl = byId[`rv:${H('Downloads')}`];
+  assert.equal(dl.action.kind, 'reveal'); assert.ok(!dl.selectable); assert.ok(dl.howTo);
+  for (const i of review) assert.ok(i.action.kind === 'reveal' ? i.howTo : i.warning, `${i.id} has neither steps nor a warning`);
+});
+
+test('empties the Trash with gio', async () => {
+  const r = await linux.emptyTrash();
+  assert.ok(r.ok);
+  assert.match(fs.readFileSync(CALLS, 'utf8'), /^gio trash --empty$/m);
 });
 
 test('Linux rules list caches, the AI model and report-only reviews', async () => {
